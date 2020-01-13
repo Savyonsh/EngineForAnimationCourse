@@ -16,6 +16,9 @@
 //#include <Eigen/Core>
 #include <memory>
 #include <vector>
+#include <set>
+
+#include <igl\AABB.h>
 
 // Alec: This is a mesh class containing a variety of data types (normals,
 // overlays, material colors, etc.)
@@ -28,6 +31,10 @@
 // See this thread for a more detailed discussion:
 // https://github.com/libigl/libigl/pull/1029
 //
+
+using namespace Eigen;
+using namespace std;
+
 namespace igl
 {
 
@@ -53,6 +60,63 @@ public:
   IGL_INLINE void set_mesh(const Eigen::MatrixXd& V, const Eigen::MatrixXi& F);
   IGL_INLINE void set_vertices(const Eigen::MatrixXd& V);
   IGL_INLINE void set_normals(const Eigen::MatrixXd& N);
+
+
+//------------------------------------------------------------------------------------------//
+
+  /* ASSIGNMENT 2 */
+  typedef std::set<std::pair<double, int> > PriorityQueue;
+
+ // FUNCTIONS :
+  IGL_INLINE void reset();
+  IGL_INLINE void calculate_Kps(MatrixXi& F, MatrixXd& V);
+  IGL_INLINE void save_original_vertices_and_faces() { OF = F; OV = V; }
+  IGL_INLINE bool my_collapse_edge(MatrixXi& F, MatrixXd& V, bool& calQ);
+  IGL_INLINE double calculate_position_and_cost(int edge);
+  IGL_INLINE MatrixXd sum_Qs(int edge);
+
+  // FIELDS
+  MatrixXd OV; 
+  MatrixXi OF; 
+  MatrixXi E;
+  MatrixXi EF;
+  MatrixXi EI;
+  VectorXi EMAP;
+  PriorityQueue Q;
+  float velocity;
+  Vector3f direction;
+  PriorityQueue::iterator Qiterator;
+  vector<PriorityQueue::iterator> Qit;
+  MatrixXd C;  
+  vector<MatrixXd> vertices_planes;
+
+  //------------------------------------------------------------------------------------------//
+  /* ASSIGNMENT 3 */
+  //Functions:
+  void Translate(Eigen::Vector3f amt);
+  Eigen::Vector3f getTopInWorld(Eigen::Matrix4f& world);
+  Eigen::Vector3f getBottomInWorld(Eigen::Matrix4f& world);
+
+  //Feilds:
+  string model;
+  ViewerData* father = nullptr;
+  ViewerData* son = nullptr; 
+  Vector3f top;
+  Vector4f topF;
+  Vector3f bottom;
+  Vector4f bottomF;
+  bool shimi = true;
+
+//------------------------------------------------------------------------------------------//
+/* ASSIGNMENT 4 */
+  // Functions:
+  void drawBox(AlignedBox<double, 3> m_box, RowVector3d color);
+  void drawBoxes(igl::AABB<Eigen::MatrixXd, 3>* tree);
+
+  // Fields:
+  igl::AABB<Eigen::MatrixXd, 3> tree;
+
+//------------------------------------------------------------------------------------------//
 
   IGL_INLINE void set_visible(bool value, unsigned int core_id = 1);
 
@@ -125,6 +189,8 @@ public:
   IGL_INLINE void add_label (const Eigen::VectorXd& P,  const std::string& str);
   // Clear the label data
   IGL_INLINE void clear_labels ();
+
+  IGL_INLINE void igl::opengl::ViewerData::decimate_by_size(int num_of_faces);
 
   // Computes the normals of the mesh
   IGL_INLINE void compute_normals();

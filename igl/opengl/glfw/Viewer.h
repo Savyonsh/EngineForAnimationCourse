@@ -62,6 +62,7 @@ namespace glfw
     // Draw everything
    // IGL_INLINE void draw();
     // OpenGL context resize
+
    
     // Helper functions
 
@@ -92,6 +93,8 @@ namespace glfw
     //   #meshes-1)
     IGL_INLINE int append_mesh(bool visible = true);
 
+	IGL_INLINE void turn_on_flag() { selected_data_index = data_list.size(); }
+
     // Erase a mesh (i.e., its corresponding data and state entires in data_list
     // and opengl_state_list)
     //
@@ -114,6 +117,12 @@ namespace glfw
     // Returns 0 if not found
     IGL_INLINE size_t mesh_index(const int id) const;
 
+	//------------------------------------------------------------------------------------------------//
+	//				A S S I G M E N T   3
+	IGL_INLINE void Animate(Eigen::Vector3f root, Eigen::Vector3f endpoint, ViewerData* cy, Eigen::Vector3f destPoint);
+
+	//------------------------------------------------------------------------------------------------//
+
 
 public:
     //////////////////////
@@ -127,8 +136,22 @@ public:
 
     size_t selected_data_index;
     int next_data_id;
+	bool worldSelect;
+	
+	// Assignment 3
 
+	//float lengthOfArm;
+	//bool isIk = false;
 
+	// Assignment 4
+    void isIntersection();
+    bool isIntersectBox(Eigen::AlignedBox3d& box0, Eigen::AlignedBox3d& box1,
+                        Eigen::Matrix4d& model0, Eigen::Matrix4d& model1,
+                        Eigen::Matrix3d& Rot0, Eigen::Matrix3d& Rot1);
+    bool recursionIsIntersection(igl::AABB<Eigen::MatrixXd, 3>* tree0, igl::AABB<Eigen::MatrixXd, 3>* tree1,
+                                 Eigen::Matrix4d& model0, Eigen::Matrix4d& model1,
+                                 Eigen::Matrix3d& Rot0, Eigen::Matrix3d& Rot1);
+	bool move_models = false;
     
 
     // List of registered plugins

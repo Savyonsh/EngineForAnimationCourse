@@ -4,6 +4,9 @@
 #include <igl/unproject_onto_mesh.h>
 #include "igl/look_at.h"
 #include <Eigen/Dense>
+
+using namespace Eigen; 
+
 Renderer::Renderer() : selected_core_index(0),
 next_core_id(2)
 {
@@ -36,7 +39,7 @@ next_core_id(2)
 
 }
 
-IGL_INLINE void Renderer::draw( GLFWwindow* window)
+IGL_INLINE void Renderer::draw(GLFWwindow* window)
 {
 	using namespace std;
 	using namespace Eigen;
@@ -46,12 +49,12 @@ IGL_INLINE void Renderer::draw( GLFWwindow* window)
 
 	int width_window, height_window;
 	glfwGetWindowSize(window, &width_window, &height_window);
-	
+
 	auto highdpi_tmp = (width_window == 0 || width == 0) ? highdpi : (width / width_window);
 
 	if (fabs(highdpi_tmp - highdpi) > 1e-8)
 	{
-		post_resize(window,width, height);
+		post_resize(window, width, height);
 		highdpi = highdpi_tmp;
 	}
 
@@ -62,13 +65,37 @@ IGL_INLINE void Renderer::draw( GLFWwindow* window)
 
 	for (auto& core : core_list)
 	{
-		for (auto& mesh : scn->data_list)
+		for (auto& mesh : scn->data_list) // Original
 		{
 			if (mesh.is_visible & core.id)
 			{
-				core.draw(scn->MakeTrans(),mesh);
+				core.draw(scn->MakeTrans(), mesh);
 			}
 		}
+
+		////-------Shaked-------//
+		////if (mesh->is_visible & core.id) {
+		//Eigen::Matrix4f product = scn->MakeTrans();
+		//igl::opengl::ViewerData* mesh;
+		//for (int i = 0; i < scn->data_list.size(); i++) {
+		//	mesh = &(scn->data_list[i]);
+
+		//	if (!(strcmp(&(mesh->model[0]), "sphere"))) {
+		//		core.draw(scn->MakeTrans(), *mesh);
+		//	}
+		//	else {
+		//		if (mesh->son != nullptr) {
+		//			product = product * mesh->son->MakeTrans();
+		//			core.draw(product, *mesh);
+		//		}
+		//		else {
+		//			core.draw(product, *mesh);
+		//		}
+
+		//	}
+
+		//}		
+		////--------------------//
 	}
 
 }
@@ -96,20 +123,44 @@ void Renderer::UpdatePosition(double xpos, double ypos)
 
 void Renderer::MouseProcessing(int button)
 {
-	
-	if (button == 1)
-	{
+	if (button == 1) {
+		// World
+		if (scn->worldSelect) {
+			scn->TranslateInSystem(scn->MakeTrans(), Eigen::Vector3f(-xrel / 500.0f, 0, 0), true);
+			scn->TranslateInSystem(scn->MakeTrans(), Eigen::Vector3f(0, yrel / 500.0f, 0), true);
+		}
+		// Selected object
+		else {
+				scn->data().Translate(Eigen::Vector3f(-xrel / 1000.0f, 0, 0));
+				scn->data().Translate(Eigen::Vector3f(0, yrel / 1000.0f, 0));
+		}
+	}
+	else {
+		// World
+		if (scn->worldSelect) {
+			scn->RotateInSystem(scn->MakeTrans(), Eigen::Vector3f(1, 0, 0), xrel / 380.0f, true);
+			scn->RotateInSystem(scn->MakeTrans(), Eigen::Vector3f(0, 0, 1), yrel / 380.0f, true);
+		}
+		// Selected object
+		else {
+			// scn->data().MyRotate(Eigen::Vector3f(1, 0, 0), xrel / 180.0f, true);
+			// scn->data().MyRotate(Eigen::Vector3f(0, 0, 1), yrel / 180.0f, true);
+			scn->data().MyRotateX(xrel / 180.0f);
+			scn->data().MyRotateY(yrel / 180.0f);
+		}
+	}
 
+	/*if (button == 1)
+	{ // right click
 		scn->data().MyTranslate(Eigen::Vector3f(-xrel / 2000.0f, 0, 0));
-		scn->data().MyTranslate(Eigen::Vector3f(0,yrel / 2000.0f,0));
-		
+		scn->data().MyTranslate(Eigen::Vector3f(0, yrel / 2000.0f, 0));
 	}
 	else
-	{
+	{ // left click
 		scn->data().MyRotate(Eigen::Vector3f(1,0,0),xrel / 180.0f);
 		scn->data().MyRotate(Eigen::Vector3f(0, 0,1),yrel / 180.0f);
-	}
-	
+	}*/
+
 }
 
 Renderer::~Renderer()
@@ -118,23 +169,79 @@ Renderer::~Renderer()
 	//	delete scn;
 }
 
-bool Renderer::Picking(double newx, double newy)
+bool Renderer::Picking(double newx, double newy, double &z)
 {
-		int fid;
-		//Eigen::MatrixXd C = Eigen::MatrixXd::Constant(scn->data().F.rows(), 3, 1);
-		Eigen::Vector3f bc;
-		double x = newx;
-		double y = core().viewport(3) - newy;
-		Eigen::Matrix4f view = Eigen::Matrix4f::Identity();
-		igl::look_at(core().camera_eye, core().camera_center, core().camera_up, view);
-		view = view * (core().trackball_angle * Eigen::Scaling(core().camera_zoom * core().camera_base_zoom)
-				* Eigen::Translation3f(core().camera_translation + core().camera_base_translation)).matrix() * scn->MakeTrans() * scn->data().MakeTrans();
-		if (igl::unproject_onto_mesh(Eigen::Vector2f(x, y), view,
- 			core().proj, core().viewport, scn->data().V, scn->data().F, fid, bc))
-		{
-			return true;
+	Vector3f bc;
+	double x = newx;
+	double y = core().viewport(3) - newy;
+	int fid; // Face index in scn->data().F
+	Matrix4f view = Matrix4f::Identity();
+
+	igl::look_at(core().camera_eye, core().camera_center, core().camera_up, view);
+	//view = view
+	//	* (core().trackball_angle * Eigen::Scaling(core().camera_zoom * core().camera_base_zoom)
+	//		* Eigen::Translation3f(core().camera_translation + core().camera_base_translation)).matrix()
+	//	* scn->MakeTrans() * scn->data().MakeTrans();
+
+	view = view *
+		(core().trackball_angle * Eigen::Scaling(core().camera_zoom *
+			core().camera_base_zoom) *
+			Eigen::Translation3f(core().camera_translation + core().camera_base_translation)).matrix() 
+		* scn->MakeTrans();
+
+	if (strcmp(&(scn->data().model[0]), "sphere")) {
+		if (scn->data().son != nullptr) {
+			igl::opengl::ViewerData* son = scn->data().son;
+			while (son->son != nullptr) {
+				son = son->son;
+			}
+			while (son != &(scn->data())) {
+				view = view * son->MakeTrans();
+				son = son->father;
+			}
+
 		}
-		return false;
+	}
+	view = view * scn->data().MakeTrans();
+
+	// Sends a beam from camera to mouse click position to determain if 
+	// it touched a face on this model. if it has - fid holds it's index in
+	// scn->data().F and bc holds the linear combination of the face's vecrtices 
+	// that make the mouse coordinates. 
+	if (igl::unproject_onto_mesh(Eigen::Vector2f(x, y), view,
+		core().proj, core().viewport, scn->data().V, scn->data().F, fid, bc))
+	{
+
+		Vector3d p_1, p_2, p_3, p_x;
+		Vector3d bcDouble = bc.template cast<double>();
+
+		p_1 << scn->data().V(scn->data().F(fid, 0), 0),
+			scn->data().V(scn->data().F(fid, 0), 1),
+			scn->data().V(scn->data().F(fid, 0), 2);
+
+		p_2 << scn->data().V(scn->data().F(fid, 1), 0),
+			scn->data().V(scn->data().F(fid, 1), 1),
+			scn->data().V(scn->data().F(fid, 1), 2);
+
+		p_3 << scn->data().V(scn->data().F(fid, 2), 0),
+			scn->data().V(scn->data().F(fid, 2), 1),
+			scn->data().V(scn->data().F(fid, 2), 2);
+
+		p_x = p_1 * bcDouble(0) + p_2 * bcDouble(1) + p_3 * bcDouble(2);
+		Vector4d p_x_in_world;
+		p_x_in_world << p_x(0),
+			p_x(1),
+			p_x(2),
+			1;
+
+		p_x_in_world = view.cast<double>() * p_x_in_world;
+		z = p_x_in_world(2);
+		return true;
+	}
+	else {
+		scn->selected_data_index = scn->data_list.size();
+	}
+	return false;
 	
 }
 

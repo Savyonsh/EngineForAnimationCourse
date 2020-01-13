@@ -106,6 +106,23 @@ Display::Display(int windowWidth, int windowHeight, const std::string& title)
 		
 }
 
+static void CalculateIK(igl::opengl::glfw::Viewer* scn, igl::opengl::ViewerData* last, Eigen::Vector3f destPoint) {
+	// Start animation with the last cylinder
+	// Calculating root and endpoint 
+	igl::opengl::ViewerData* curr = nullptr;
+	Eigen::Vector3f endpoint(last->getTopInWorld(scn->MakeTrans()));
+	Eigen::Vector3f root(last->getBottomInWorld(scn->MakeTrans()));
+	scn->Animate(root, endpoint, last, destPoint);
+
+	curr = last->son;
+	while (curr) {
+		endpoint = last->getTopInWorld(scn->MakeTrans());
+		root = curr->getBottomInWorld(scn->MakeTrans());
+		scn->Animate(root, endpoint, curr, destPoint);
+		curr = curr->son;
+	}
+}
+
 bool Display::launch_rendering(bool loop)
 {
 	// glfwMakeContextCurrent(window);
@@ -117,9 +134,51 @@ bool Display::launch_rendering(bool loop)
 	Renderer* renderer = (Renderer*)glfwGetWindowUserPointer(window);
 	glfwGetWindowSize(window, &windowWidth, &windowHeight);
 	renderer->post_resize(window, windowWidth, windowHeight);
-	
+	igl::opengl::glfw::Viewer* scn = renderer->GetScene();
 	while (!glfwWindowShouldClose(window))
 	{
+		if (scn->move_models) {
+			// Assignment 3 
+			//igl::opengl::ViewerData* last = nullptr;
+			//igl::opengl::ViewerData* first = nullptr;
+			//Vector3f destPoint;
+			//// Finding the first and last cylinder, finding shprere
+			//for (unsigned int i = 0; i < scn->data_list.size(); i++) {
+			//	if (strcmp(&scn->data_list[i].model[0], "sphere") && !scn->data_list[i].father) {
+			//		last = &scn->data_list[i];
+			//	}
+			//	if (!strcmp(&scn->data_list[i].model[0], "sphere")) {
+			//		Vector4f centerSphere(0, 0, 0, 1);
+			//		destPoint = (scn->MakeTrans() * scn->data_list[i].MakeTrans() * centerSphere).block<3, 1>(0, 0);
+			//	}
+			//	if (strcmp(&scn->data_list[i].model[0], "sphere") && !scn->data_list[i].son) {
+			//		first = &scn->data_list[i];
+			//	}
+			//}
+			//Eigen::Vector3f bottom = first->getBottomInWorld(scn->MakeTrans());
+			//float distance = sqrt(pow(destPoint(0) - bottom(0), 2) +
+			//	pow(destPoint(1) - bottom(1), 2) +
+			//	pow(destPoint(2) - bottom(2), 2));
+			//if (distance <= scn->lengthOfArm)
+			//{
+			//	CalculateIK(scn, last, destPoint);
+			//	float delta;
+			//	Eigen::Vector3f top = last->getTopInWorld(scn->MakeTrans());
+			//	delta = sqrt(pow(destPoint(0) - top(0), 2) +
+			//		pow(destPoint(1) - top(1), 2) +
+			//		pow(destPoint(2) - top(2), 2));
+			//	if (delta <= 0.1) {
+			//		cout << delta << endl;
+			//		scn->isIk = false;
+			//	}
+			//}
+			//else {
+			//	cout << "Distance too far." << endl;
+			//	scn->isIk = false;
+			//}
+			scn->data().Translate(scn->data().velocity * scn->data().direction);
+			scn->isIntersection();
+		}
 
 		double tic = igl::get_seconds();
 		renderer->draw(window);
@@ -137,9 +196,11 @@ bool Display::launch_rendering(bool loop)
 		}
 		else
 		{
-			glfwWaitEvents();
+			//glfwWaitEvents();
+			glfwPollEvents();
 			frame_counter = 0;
 		}
+
 		if (!loop)
 			return !glfwWindowShouldClose(window);
 
@@ -200,4 +261,6 @@ Display::~Display()
 	glfwDestroyWindow(window);
 	glfwTerminate();
 }
+
+
 
