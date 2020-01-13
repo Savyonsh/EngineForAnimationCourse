@@ -55,7 +55,7 @@ using namespace std;
 
 // Assignment 3 //
 
-bool read_Meshes(igl::opengl::glfw::Viewer* viewer, string file, int amountOfCy) {
+bool read_Meshes(igl::opengl::glfw::Viewer* viewer, string file, int amountOfCy, int amountOfSh) {
 	ifstream conFile;
 	string line;
 	string modelName;
@@ -69,7 +69,7 @@ bool read_Meshes(igl::opengl::glfw::Viewer* viewer, string file, int amountOfCy)
 			modelName.erase(modelName.find_last_of('.'));
 			modelName.erase(0, modelName.find_last_of('\\') + 1);
 			bool amISphere = !strcmp(&modelName[0], "sphere");
-			!amISphere ? times = amountOfCy : times = 1;
+			!amISphere ? times = amountOfCy : times = amountOfSh;
 			for (int i = 0; i < times; i++) {
 				viewer->load_mesh_from_file(line);
 				viewer->data_list[selectedIndex++].model = modelName;
@@ -103,6 +103,7 @@ void adjustModels(igl::opengl::glfw::Viewer* viewer, int times) {
 	bool first = true;
 	int i;
 	float counter = 0;
+	float counterSh = 0;
 	float lenOfCy;
 	Eigen::Vector3d m;
 	Eigen::Vector3d M;
@@ -115,7 +116,8 @@ void adjustModels(igl::opengl::glfw::Viewer* viewer, int times) {
 		curr->show_overlay_depth = false;
 
 		if (!(strcmp(&curr->model[0], "sphere"))) {
-			curr->MyTranslate(Eigen::Vector3f(5, 0, 0));
+			curr->MyTranslate(Eigen::Vector3f(5 * counterSh++, 0, 0));
+			curr->show_lines = false;
 		}
 		else {
 			m = curr->V.colwise().minCoeff();
@@ -138,7 +140,7 @@ void adjustModels(igl::opengl::glfw::Viewer* viewer, int times) {
 					0, 5;
 
 				lenOfCy = M(1) - m(1);
-				viewer->lengthOfArm = lenOfCy* times;
+				viewer->lengthOfArm = lenOfCy * times;
 				first = false;
 			}
 
@@ -169,8 +171,6 @@ void adjustModels(igl::opengl::glfw::Viewer* viewer, int times) {
 	}
 	// Adjusting the "camera"
 	viewer->MyTranslate(Eigen::Vector3f(-8, -10, -30));
-	//viewer->TranslateInSystem(viewer->MakeTrans(), Eigen::Vector3f(-8, -4, -15), true);
-
 }
 
 int main(int argc, char* argv[])
@@ -185,8 +185,8 @@ int main(int argc, char* argv[])
 
 	// Assignment 3 //
 
-	int cyNum = 15;
-	if (!(read_Meshes(&viewer, "configuration.txt", cyNum))) return 1;
+	int cyNum = 15, shNum = 5;
+	if (!(read_Meshes(&viewer, "configuration.txt", cyNum, shNum))) return 1;
 	adjustModels(&viewer, cyNum);
 
 	Init(*disp);

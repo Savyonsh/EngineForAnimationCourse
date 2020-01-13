@@ -179,7 +179,6 @@ namespace glfw
 		MatrixXd C;
 		igl::point_mesh_squared_distance(V, V, F, sqrD, I, C);
 		max_distance = sqrt(sqrD.maxCoeff());
-		data().tree.init(V, F);
 
 		// Precompute vertex,edge and face normals
 		igl::per_face_normals(V, F, FN);
@@ -191,6 +190,7 @@ namespace glfw
 	
 		data().set_mesh(V, F);
 		data().save_original_vertices_and_faces();
+		data().tree.init(V, F);
 		data().reset();
 		return true;
 	}
@@ -203,6 +203,7 @@ namespace glfw
 
 		data().set_mesh(V,F);
 		data().save_original_vertices_and_faces();
+		data().tree.init(V, F);
 		data().reset();
 	}
     else if (extension == "obj" || extension =="OBJ")
@@ -230,6 +231,7 @@ namespace glfw
       data().set_mesh(V,F);
       data().set_uv(UV_V,UV_F);
 	  data().save_original_vertices_and_faces();	
+	  data().tree.init(V, F);
 	  data().reset();
     }
     else
