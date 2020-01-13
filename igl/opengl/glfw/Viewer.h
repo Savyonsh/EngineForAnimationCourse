@@ -140,8 +140,8 @@ public:
 	
 	// Assignment 3
 
-	//float lengthOfArm;
-	//bool isIk = false;
+	float lengthOfArm;
+	bool isIk = false;
 
 	// Assignment 4
     void isIntersection();

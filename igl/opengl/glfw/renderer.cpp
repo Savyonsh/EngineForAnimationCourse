@@ -65,36 +65,33 @@ IGL_INLINE void Renderer::draw(GLFWwindow* window)
 
 	for (auto& core : core_list)
 	{
-		for (auto& mesh : scn->data_list) // Original
-		{
-			if (mesh.is_visible & core.id)
-			{
-				core.draw(scn->MakeTrans(), mesh);
+		//for (auto& mesh : scn->data_list) // Original
+		//{
+		//	if (mesh.is_visible & core.id)
+		//	{
+		//		core.draw(scn->MakeTrans(), mesh);
+		//	}
+		//}
+
+		//-------Shaked-------//
+		//if (mesh->is_visible & core.id) {
+		Eigen::Matrix4f product = scn->MakeTrans();
+		igl::opengl::ViewerData* mesh;
+		for (int i = 0; i < scn->data_list.size(); i++) {
+			mesh = &(scn->data_list[i]);
+			if (!(strcmp(&(mesh->model[0]), "sphere"))) {
+				core.draw(scn->MakeTrans(), *mesh);
 			}
-		}
-
-		////-------Shaked-------//
-		////if (mesh->is_visible & core.id) {
-		//Eigen::Matrix4f product = scn->MakeTrans();
-		//igl::opengl::ViewerData* mesh;
-		//for (int i = 0; i < scn->data_list.size(); i++) {
-		//	mesh = &(scn->data_list[i]);
-
-		//	if (!(strcmp(&(mesh->model[0]), "sphere"))) {
-		//		core.draw(scn->MakeTrans(), *mesh);
-		//	}
-		//	else {
-		//		if (mesh->son != nullptr) {
-		//			product = product * mesh->son->MakeTrans();
-		//			core.draw(product, *mesh);
-		//		}
-		//		else {
-		//			core.draw(product, *mesh);
-		//		}
-
-		//	}
-
-		//}		
+			else {
+				if (mesh->son != nullptr) {
+					product = product * mesh->son->MakeTrans();
+					core.draw(product, *mesh);
+				}
+				else {
+					core.draw(product, *mesh);
+				}
+			}
+		}		
 		////--------------------//
 	}
 
