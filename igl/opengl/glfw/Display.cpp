@@ -135,52 +135,88 @@ bool Display::launch_rendering(bool loop)
 	glfwGetWindowSize(window, &windowWidth, &windowHeight);
 	renderer->post_resize(window, windowWidth, windowHeight);
 	igl::opengl::glfw::Viewer* scn = renderer->GetScene();
+	// Assignment 3 
+	igl::opengl::ViewerData* last = nullptr;
+	igl::opengl::ViewerData* first = nullptr;
+	Vector3f destPoint;
+	int index_top = 0;
+	// Finding the first and last cylinder, finding shprere
+	for (unsigned int i = 0; i < scn->data_list.size(); i++) {
+		if (strcmp(&scn->data_list[i].model[0], "sphere") && !scn->data_list[i].father) {
+			last = &scn->data_list[i];
+			//saving the index of the last cylinder - the top
+			index_top = i;
+		}
+		if (strcmp(&scn->data_list[i].model[0], "sphere") && !scn->data_list[i].son) {
+			first = &scn->data_list[i];
+		}
+	}	
+
 	while (!glfwWindowShouldClose(window))
 	{
-		if (scn->move_models) {
-			// Assignment 3 
-			//igl::opengl::ViewerData* last = nullptr;
-			//igl::opengl::ViewerData* first = nullptr;
-			//Vector3f destPoint;
-			//// Finding the first and last cylinder, finding shprere
-			//for (unsigned int i = 0; i < scn->data_list.size(); i++) {
-			//	if (strcmp(&scn->data_list[i].model[0], "sphere") && !scn->data_list[i].father) {
-			//		last = &scn->data_list[i];
-			//	}
-			//	if (!strcmp(&scn->data_list[i].model[0], "sphere")) {
-			//		Vector4f centerSphere(0, 0, 0, 1);
-			//		destPoint = (scn->MakeTrans() * scn->data_list[i].MakeTrans() * centerSphere).block<3, 1>(0, 0);
-			//	}
-			//	if (strcmp(&scn->data_list[i].model[0], "sphere") && !scn->data_list[i].son) {
-			//		first = &scn->data_list[i];
-			//	}
-			//}
-			//Eigen::Vector3f bottom = first->getBottomInWorld(scn->MakeTrans());
-			//float distance = sqrt(pow(destPoint(0) - bottom(0), 2) +
-			//	pow(destPoint(1) - bottom(1), 2) +
-			//	pow(destPoint(2) - bottom(2), 2));
-			//if (distance <= scn->lengthOfArm)
-			//{
-			//	CalculateIK(scn, last, destPoint);
-			//	float delta;
-			//	Eigen::Vector3f top = last->getTopInWorld(scn->MakeTrans());
-			//	delta = sqrt(pow(destPoint(0) - top(0), 2) +
-			//		pow(destPoint(1) - top(1), 2) +
-			//		pow(destPoint(2) - top(2), 2));
-			//	if (delta <= 0.1) {
-			//		cout << delta << endl;
-			//		scn->isIk = false;
-			//	}
-			//}
-			//else {
-			//	cout << "Distance too far." << endl;
-			//	scn->isIk = false;
-			//}
-			scn->data().Translate(scn->data().velocity * scn->data().direction);
-			scn->isIntersection();
+		// Falling animation for spheres 
+		for (auto sphere : scn->spheres) {
+			if (sphere->should_appear) {
+				if ((scn->MakeTrans() * sphere->MakeTrans() * sphere->bottomF)(1)
+								  <= first->getBottomInWorld(scn->MakeTrans())(1)) {
+					if ((sphere->direction(1) > 0 && sphere->velocity < 0.02))
+						sphere->move_model = false;
+					else
+						sphere->direction = -sphere->direction;
+				}
+				else if ((sphere->direction(1) > 0 && sphere->velocity < 0.0000000001))
+					sphere->direction = -sphere->direction;
+				if (sphere->move_model) {
+					if (sphere->direction(1) < 0)
+						sphere->velocity += 0.07;
+					else {
+						sphere->velocity -= 0.1;
+					}
+					sphere->Translate(sphere->velocity * sphere->direction);
+				}
+			}
 		}
+		// ------------------------------//
+		if (scn->isIk) {
+			// calculate the destenation point every loop as the selected shpere moves as well
+			destPoint = (scn->MakeTrans() * scn->data().MakeTrans() * Vector4f(0, 0, 0, 1)).block<3, 1>(0, 0);
+			Eigen::Vector3f bottom = first->getBottomInWorld(scn->MakeTrans());
+			float distance = sqrt(pow(destPoint(0) - bottom(0), 2) +
+				pow(destPoint(1) - bottom(1), 2) +
+				pow(destPoint(2) - bottom(2), 2));			
+			if (distance <= scn->lengthOfArm)
+			{
+				CalculateIK(scn, last, destPoint);
+				// check if there is an intersection between the top and the selected sphere
+				if (scn->isIntersection(index_top, scn->selected_data_index)) {
+					scn->isIk = false;
+					//scn->data().should_appear = false;
+					scn->data().move_model = false;
+				}
+
+				//float delta;
+				//Eigen::Vector3f top = last->getTopInWorld(scn->MakeTrans());
+				//delta = sqrt(pow(destPoint(0) - top(0), 2) +
+				//	pow(destPoint(1) - top(1), 2) +
+				//	pow(destPoint(2) - top(2), 2));				
+				//if (delta <= 0.1 && delta > 0) {
+				//	scn->isIk = false;
+				//	scn->data().should_appear = false;
+				//	scn->data().move_model = false;
+				//}
+			}
+			else {
+				cout << "Distance too far." << endl;
+				scn->isIk = false;
+			}
+		}
+		//if (scn->move_models) {
+		//	scn->data().Translate(scn->data().velocity * scn->data().direction);
+		//	scn->isIntersection();
+		//}		
 
 		double tic = igl::get_seconds();
+			
 		renderer->draw(window);
 		glfwSwapBuffers(window);
 		if (renderer->core().is_animating || frame_counter++ < num_extra_frames)

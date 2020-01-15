@@ -459,19 +459,18 @@ namespace glfw
 	  Eigen::Vector3f RD(destPoint - root);
 	  Eigen::Vector3f RE(endpoint - root);
 	  float angle = acos(RE.normalized().dot(RD.normalized()));
+	 angle = angle / 10;
+	  //Eigen::Matrix3f rot = Eigen::AngleAxisf(angle, (RE.cross(RD)).normalized()).matrix();
+	  //float angleY0 = atan2(rot(0, 1), rot(2, 1));
+	  //float angleX = acos(rot(1, 1));
+	  //float angleY1 = atan2(rot(1, 0), -rot(1, 2));
 
-	  Eigen::Matrix3f rot = Eigen::AngleAxisf(angle, (RE.cross(RD)).normalized()).matrix();
-	  float angleY0 = atan2(rot(0, 1), rot(2, 1));
-	  float angleX = acos(rot(1, 1));
-	  float angleY1 = atan2(rot(1, 0), -rot(1, 2));
+	  //cy->MyRotateY(angleY0);
+	  //cy->MyRotateX(angleX);
+	  //cy->MyRotateY(angleY1);
 
-	  cy->MyRotateY(angleY0);
-	  cy->MyRotateX(angleX);
-	  cy->MyRotateY(angleY1);
-
-	 // cy->MyRotate((RE.cross(RD)).normalized(), angle);
+	  cy->MyRotate((RE.cross(RD)).normalized(), angle);
   }
-
   /*return true if and only if the boxes are sperated*/
   IGL_INLINE bool Viewer::isIntersectBox(Eigen::AlignedBox3d& box0, Eigen::AlignedBox3d& box1,
                                          Eigen::Matrix4d& model0, Eigen::Matrix4d& model1,
@@ -536,16 +535,16 @@ namespace glfw
       return false;
   }
 
-  IGL_INLINE void Viewer::isIntersection() {
-      Eigen::Matrix4d model0 = data_list[0].MakeTransD();
-      Eigen::Matrix4d model1 = data_list[1].MakeTransD();
+  IGL_INLINE bool Viewer::isIntersection(int index_model_1, int index_model_2) {
+      Eigen::Matrix4d model0 = data_list[index_model_1].MakeTransD();
+      Eigen::Matrix4d model1 = data_list[index_model_2].MakeTransD();
       Eigen::Matrix3d Rot0 = model0.block<3, 3>(0, 0);
       Eigen::Matrix3d Rot1 = model1.block<3, 3>(0, 0);
       igl::AABB<Eigen::MatrixXd, 3>& tree0 = data_list[0].tree;
       igl::AABB<Eigen::MatrixXd, 3>& tree1 = data_list[1].tree;
 
-      // move_models = isIntersectBox(tree0.m_box, tree1.m_box, model0, model1, Rot0, Rot1);
       move_models = !recursionIsIntersection(&(data_list[0].tree), &(data_list[1].tree), model0, model1, Rot0, Rot1);
+	  return move_models;
   }
 
   bool Viewer::recursionIsIntersection(igl::AABB<Eigen::MatrixXd, 3>* tree0, igl::AABB<Eigen::MatrixXd, 3>* tree1,

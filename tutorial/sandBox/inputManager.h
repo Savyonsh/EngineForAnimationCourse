@@ -42,7 +42,6 @@ static void glfw_mouse_press(GLFWwindow* window, int button, int action, int mod
 		{
 			std::cout << "didn't find anything" << std::endl;
 			scn->selected_data_index = savedIndx;
-			//scn->selected_data_index = scn->data_list.size(); // sharon
 			scn->worldSelect = true;
 		}
 		else {
@@ -50,10 +49,8 @@ static void glfw_mouse_press(GLFWwindow* window, int button, int action, int mod
 			scn->selected_data_index = closest;
 			scn->worldSelect = false;
 			// std::cout << "choose(" << closest << ")" << std::endl;
-
-			// Just so we see which mesh is selected now
-			//Eigen::Vector3d red(1.0, 0.0, 0.0);			
-			scn->data().uniform_colors(Eigen::Vector3d(1.0, 0.0, 0.0),
+			
+			scn->data_list[closest].uniform_colors(Eigen::Vector3d(1.0, 0.0, 0.0),
 				Eigen::Vector3d(0.5, 0.3, 0.35),
 				Eigen::Vector3d(1.0, 0.5, 0.5));
 			scn->data_list[savedIndx].uniform_colors(Eigen::Vector3d(51.0 / 255.0, 43.0 / 255.0, 33.3 / 255.0),
@@ -161,7 +158,13 @@ static void glfw_key_callback(GLFWwindow* window, int key, int scancode, int act
 		}
 		case ' ':
 		{
-			scn->move_models = !(scn->move_models);
+			scn->isIk = !(scn->isIk);
+			for (auto i = 0; i < scn->data_list.size(); i++) {
+				if (!strcmp(&scn->data_list[i].model[0], "sphere")) {
+					scn->data_list[i].move_model = true;
+				}
+			}
+			//scn->move_models = !(scn->move_models);
 			break;
 		}
 		case 'L':

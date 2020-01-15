@@ -80,7 +80,8 @@ IGL_INLINE void Renderer::draw(GLFWwindow* window)
 		for (int i = 0; i < scn->data_list.size(); i++) {
 			mesh = &(scn->data_list[i]);
 			if (!(strcmp(&(mesh->model[0]), "sphere"))) {
-				core.draw(scn->MakeTrans(), *mesh);
+				if (mesh->should_appear)
+					core.draw(scn->MakeTrans(), *mesh);				
 			}
 			else {
 				if (mesh->son != nullptr) {

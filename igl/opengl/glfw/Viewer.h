@@ -134,6 +134,7 @@ public:
     // Stores all the data that should be visualized
     std::vector<ViewerData> data_list;
 
+
     size_t selected_data_index;
     int next_data_id;
 	bool worldSelect;
@@ -144,7 +145,7 @@ public:
 	bool isIk = false;
 
 	// Assignment 4
-    void isIntersection();
+    bool isIntersection(int model0, int model1);
     bool isIntersectBox(Eigen::AlignedBox3d& box0, Eigen::AlignedBox3d& box1,
                         Eigen::Matrix4d& model0, Eigen::Matrix4d& model1,
                         Eigen::Matrix3d& Rot0, Eigen::Matrix3d& Rot1);
@@ -152,6 +153,7 @@ public:
                                  Eigen::Matrix4d& model0, Eigen::Matrix4d& model1,
                                  Eigen::Matrix3d& Rot0, Eigen::Matrix3d& Rot1);
 	bool move_models = false;
+	std::vector<ViewerData*> spheres;
     
 
     // List of registered plugins

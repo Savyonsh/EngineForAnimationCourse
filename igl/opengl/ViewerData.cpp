@@ -401,14 +401,14 @@ void::igl::opengl::ViewerData::drawBox(AlignedBox<double, 3> m_box, RowVector3d 
 	MatrixXd boxPoints(8, 3);
 	Eigen::MatrixXi boxLines(12, 2);
 
+	boxPoints.row(0) = m_box.corner(m_box.BottomLeftFloor);
 	boxPoints.row(1) = m_box.corner(m_box.BottomRightFloor);
 	boxPoints.row(2) = m_box.corner(m_box.TopRightFloor);
-	boxPoints.row(5) = m_box.corner(m_box.BottomRightCeil);
-	boxPoints.row(6) = m_box.corner(m_box.TopRightCeil);
-	boxPoints.row(4) = m_box.corner(m_box.BottomLeftCeil);
-	boxPoints.row(7) = m_box.corner(m_box.TopLeftCeil);
-	boxPoints.row(0) = m_box.corner(m_box.BottomLeftFloor);
 	boxPoints.row(3) = m_box.corner(m_box.TopLeftFloor);
+	boxPoints.row(4) = m_box.corner(m_box.BottomLeftCeil);
+	boxPoints.row(5) = m_box.corner(m_box.BottomRightCeil);
+	boxPoints.row(6) = m_box.corner(m_box.TopRightCeil);	
+	boxPoints.row(7) = m_box.corner(m_box.TopLeftCeil);	
 
 	boxLines <<
 		0, 1,

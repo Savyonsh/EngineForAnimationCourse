@@ -83,8 +83,6 @@ public:
   MatrixXi EI;
   VectorXi EMAP;
   PriorityQueue Q;
-  float velocity;
-  Vector3f direction;
   PriorityQueue::iterator Qiterator;
   vector<PriorityQueue::iterator> Qit;
   MatrixXd C;  
@@ -117,7 +115,14 @@ public:
   igl::AABB<Eigen::MatrixXd, 3> tree;
 
 //------------------------------------------------------------------------------------------//
+  // Project //
+  bool move_model = false;
+  Eigen::Vector3f direction;
+  float velocity;  
+  bool should_appear = true;
+  
 
+  //---------------------------------------------------------------------------------------//
   IGL_INLINE void set_visible(bool value, unsigned int core_id = 1);
 
   // Set the color of the mesh

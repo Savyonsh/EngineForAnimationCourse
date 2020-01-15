@@ -103,12 +103,14 @@ void adjustModels(igl::opengl::glfw::Viewer* viewer, int times) {
 	bool first = true;
 	int i;
 	float counter = 0;
-	float counterSh = 0;
+	float counterSh = 1;
 	float lenOfCy;
 	Eigen::Vector3d m;
 	Eigen::Vector3d M;
 	Eigen::MatrixXd axisPoints(6, 3);
 	Eigen::MatrixXi axisLines(5, 2);
+	Eigen::MatrixXd topBoxPoints(6, 3);
+	Eigen::MatrixXi topBoxLines(12,2);
 	igl::opengl::ViewerData* curr = nullptr;
 
 	for (i = 0; i < viewer->data_list.size(); i++) {
@@ -116,10 +118,17 @@ void adjustModels(igl::opengl::glfw::Viewer* viewer, int times) {
 		curr->show_overlay_depth = false;
 
 		if (!(strcmp(&curr->model[0], "sphere"))) {
-			curr->MyTranslate(Eigen::Vector3f(5 * counterSh++, 0, 0));
+			viewer->spheres.push_back(curr);						
+			curr->MyTranslate(Eigen::Vector3f(5 * counterSh++, 0/*20 + counterSh*2*/, 0));
+			curr->direction = Eigen::Vector3f(0, -1, 0);
+			curr->velocity = 0.1f;
 			curr->show_lines = false;
+			curr->bottomF = Vector4f(curr->V.colwise().minCoeff().cast<float>()(0),
+									 curr->V.colwise().minCoeff().cast<float>()(1),
+									 curr->V.colwise().minCoeff().cast<float>()(2), 1);
 		}
 		else {
+			counter++;
 			m = curr->V.colwise().minCoeff();
 			M = curr->V.colwise().maxCoeff();
 			// Calculating only once, for the first cylinder.
@@ -140,7 +149,8 @@ void adjustModels(igl::opengl::glfw::Viewer* viewer, int times) {
 					0, 5;
 
 				lenOfCy = M(1) - m(1);
-				viewer->lengthOfArm = lenOfCy * times;
+				viewer->lengthOfArm = lenOfCy * times;				
+				cout << viewer->lengthOfArm << endl;
 				first = false;
 			}
 
@@ -151,21 +161,21 @@ void adjustModels(igl::opengl::glfw::Viewer* viewer, int times) {
 			curr->point_size = 2;
 			curr->line_width = 3;
 			curr->show_lines = false;
-			curr->add_points(axisPoints, Eigen::RowVector3d(1, 0, 0));
+			//curr->add_points(axisPoints, Eigen::RowVector3d(1, 0, 0));
 
-			for (unsigned j = 0;j < axisLines.rows(); ++j) {
-				curr->add_edges
-				(
-					axisPoints.row(axisLines(j, 0)),
-					axisPoints.row(axisLines(j, 1)),
-					Eigen::RowVector3d(0, 0, 1)
-				);
-			}
+			//for (unsigned j = 0;j < axisLines.rows(); ++j) {
+			//	curr->add_edges
+			//	(
+			//		axisPoints.row(axisLines(j, 0)),
+			//		axisPoints.row(axisLines(j, 1)),
+			//		Eigen::RowVector3d(0, 0, 1)
+			//	);
+			//}
 
 			if (curr->son != nullptr)
 				curr->MyTranslate(Eigen::Vector3f(0, lenOfCy, 0));
 
-			curr->SetCenterOfRotation(curr->bottom);
+			curr->SetCenterOfRotation(curr->bottom);	
 		}
 
 	}
@@ -185,7 +195,7 @@ int main(int argc, char* argv[])
 
 	// Assignment 3 //
 
-	int cyNum = 15, shNum = 5;
+	int cyNum = 15, shNum = 1;
 	if (!(read_Meshes(&viewer, "configuration.txt", cyNum, shNum))) return 1;
 	adjustModels(&viewer, cyNum);
 
