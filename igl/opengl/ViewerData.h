@@ -116,10 +116,19 @@ public:
 
 //------------------------------------------------------------------------------------------//
   // Project //
-  bool move_model = false;
+  
+  /* SPHERE */
   Eigen::Vector3f direction;
-  float velocity;  
+  float velocity;
+
+  /* CYLINDER */
+  bool head_of_snake = false;
+  int index_of_son;
+
+  /* GENERAL */
+  bool move_model = false;
   bool should_appear = true;
+
   
 
   //---------------------------------------------------------------------------------------//

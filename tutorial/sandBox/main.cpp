@@ -80,6 +80,7 @@ bool read_Meshes(igl::opengl::glfw::Viewer* viewer, string file, int amountOfCy,
 		igl::opengl::ViewerData* curr = nullptr;
 		igl::opengl::ViewerData* prev = nullptr;
 		igl::opengl::ViewerData* headOfSnake = nullptr;
+		int index_of_son = 0;
 
 		for (int i = 0; i < viewer->data_list.size(); i++) {
 			if (strcmp(&(viewer->data_list[i].model)[0], "sphere")) {
@@ -89,10 +90,12 @@ bool read_Meshes(igl::opengl::glfw::Viewer* viewer, string file, int amountOfCy,
 					prev->father = curr;
 				}
 				prev = curr;
+				index_of_son = i;
 			}
 			else if(!headOfSnake) {
 				headOfSnake = &viewer->data_list[i];
 				headOfSnake->model = "ycylinder";
+				headOfSnake->head_of_snake = true;
 
 			}
 		}
@@ -100,6 +103,7 @@ bool read_Meshes(igl::opengl::glfw::Viewer* viewer, string file, int amountOfCy,
 		if (prev && headOfSnake) {
 			headOfSnake->son = prev;
 			prev->father = headOfSnake;
+			headOfSnake->index_of_son = index_of_son;
 		}
 
 		return true;
@@ -122,7 +126,7 @@ void adjustModels(igl::opengl::glfw::Viewer* viewer, int times) {
 	Eigen::MatrixXd axisPoints(6, 3);
 	Eigen::MatrixXi axisLines(5, 2);
 	Eigen::MatrixXd topBoxPoints(6, 3);
-	Eigen::MatrixXi topBoxLines(12,2);
+	Eigen::MatrixXi topBoxLines(12, 2);
 	igl::opengl::ViewerData* curr = nullptr;
 
 	for (i = 0; i < viewer->data_list.size(); i++) {
@@ -136,8 +140,8 @@ void adjustModels(igl::opengl::glfw::Viewer* viewer, int times) {
 			curr->velocity = 0.1f;
 			curr->show_lines = false;
 			curr->bottomF = Vector4f(curr->V.colwise().minCoeff().cast<float>()(0),
-									 curr->V.colwise().minCoeff().cast<float>()(1),
-									 curr->V.colwise().minCoeff().cast<float>()(2), 1);
+				curr->V.colwise().minCoeff().cast<float>()(1),
+				curr->V.colwise().minCoeff().cast<float>()(2), 1);
 		}
 		else {
 			counter++;
@@ -163,7 +167,7 @@ void adjustModels(igl::opengl::glfw::Viewer* viewer, int times) {
 				lenOfCy = M(1) - m(1);
 				widOfCy = M(0) - m(0);
 				girthOfCy = M(2) - m(2);
-				viewer->lengthOfArm = lenOfCy * times;				
+				viewer->lengthOfArm = lenOfCy * times;
 				cout << viewer->lengthOfArm << endl;
 				first = false;
 			}
@@ -173,7 +177,7 @@ void adjustModels(igl::opengl::glfw::Viewer* viewer, int times) {
 			curr->topF << 0, M(1), 0, 1;
 			curr->bottomF << 0, m(1), 0, 1;
 			curr->point_size = 2;
-			curr->line_width = 3;
+			curr->line_width = 0.5;
 			curr->show_lines = false;
 			//curr->add_points(axisPoints, Eigen::RowVector3d(1, 0, 0));
 
@@ -186,16 +190,22 @@ void adjustModels(igl::opengl::glfw::Viewer* viewer, int times) {
 			//	);
 			//}
 
-			if (curr->son != nullptr && curr->father)
+			// in between
+			if (curr->son && curr->father)
 				curr->MyTranslate(Eigen::Vector3f(0, lenOfCy, 0));
-			// top
-			if (!curr->father) {				
+			
+			// head of snake
+			if (!curr->father) {
+				curr->son->MyScale(Eigen::Vector3f(1, 0.5, 1));
+				curr->son->MyTranslate(Eigen::Vector3f(0, -(lenOfCy * 0.5) / 2, 0));
 				m = curr->V.colwise().minCoeff();
 				M = curr->V.colwise().maxCoeff();
 				float widOfSphere = M(0) - m(0);
 				float girthOfSphere = M(2) - m(2);
 				float lengthOfSphere = M(1) - m(0);
-				curr->MyTranslate(Eigen::Vector3f(0, lengthOfSphere-0.8, 0));
+				curr->MyTranslate(-Eigen::Vector3f(0, -(lenOfCy * 0.5) / 2, 0));
+				curr->MyTranslate(Eigen::Vector3f(0, -lenOfCy / 2 + 0.3, 0));
+				curr->MyScale(Eigen::Vector3f(1, 2, 1));
 				curr->MyScale(Eigen::Vector3f(widOfCy / widOfSphere, 1.2, girthOfCy / girthOfSphere));
 			}
 
@@ -205,7 +215,8 @@ void adjustModels(igl::opengl::glfw::Viewer* viewer, int times) {
 
 	}
 	// Adjusting the "camera"
-	viewer->MyTranslate(Eigen::Vector3f(-8, -10, -30));
+	//viewer->MyTranslate(Eigen::Vector3f(-8, -10, -30));
+	viewer->MyTranslate(Eigen::Vector3f(-1, -2, -7));
 }
 
 int main(int argc, char* argv[])
@@ -220,7 +231,7 @@ int main(int argc, char* argv[])
 
 	// Assignment 3 //
 
-	int cyNum = 4, shNum = 2;
+	int cyNum = 4, shNum = 1;
 	if (!(read_Meshes(&viewer, "configuration.txt", cyNum, shNum))) return 1;
 	adjustModels(&viewer, cyNum);
 

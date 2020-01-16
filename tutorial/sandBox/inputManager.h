@@ -3,6 +3,32 @@
 #include <thread>
 #include <thread>
 
+void coloring_with_snake_head(igl::opengl::glfw::Viewer* scn, int savedIndx) {
+
+	// When head of snake's son is picked - color the head as well
+	if (scn->data().father && scn->data().father->head_of_snake) {
+		scn->data().father->uniform_colors(Eigen::Vector3d(1.0, 0.0, 0.0),
+			Eigen::Vector3d(0.5, 0.3, 0.35),
+			Eigen::Vector3d(1.0, 0.5, 0.5));
+	}
+
+	// Color picked model
+	scn->data().uniform_colors(Eigen::Vector3d(1.0, 0.0, 0.0),
+		Eigen::Vector3d(0.5, 0.3, 0.35),
+		Eigen::Vector3d(1.0, 0.5, 0.5));
+
+	// "Uncolor" last picked object
+	// if the last picked model is the son of head - uncolor head as well
+	if (scn->data_list[savedIndx].father && scn->data_list[savedIndx].father->head_of_snake) {
+		scn->data_list[savedIndx].father->uniform_colors(Eigen::Vector3d(51.0 / 255.0, 43.0 / 255.0, 33.3 / 255.0),
+			Eigen::Vector3d(255.0 / 255.0, 228.0 / 255.0, 58.0 / 255.0),
+			Eigen::Vector3d(255.0 / 255.0, 235.0 / 255.0, 80.0 / 255.0));
+	}
+	scn->data_list[savedIndx].uniform_colors(Eigen::Vector3d(51.0 / 255.0, 43.0 / 255.0, 33.3 / 255.0),
+		Eigen::Vector3d(255.0 / 255.0, 228.0 / 255.0, 58.0 / 255.0),
+		Eigen::Vector3d(255.0 / 255.0, 235.0 / 255.0, 80.0 / 255.0));
+}
+
 static void glfw_mouse_press(GLFWwindow* window, int button, int action, int modifier)
 {
 
@@ -45,25 +71,19 @@ static void glfw_mouse_press(GLFWwindow* window, int button, int action, int mod
 			scn->worldSelect = true;
 		}
 		else {
-			std::cout << closest << std::endl;
-			scn->selected_data_index = closest;
 			scn->worldSelect = false;
 			// std::cout << "choose(" << closest << ")" << std::endl;
-			
-			scn->data_list[closest].uniform_colors(Eigen::Vector3d(1.0, 0.0, 0.0),
-				Eigen::Vector3d(0.5, 0.3, 0.35),
-				Eigen::Vector3d(1.0, 0.5, 0.5));
-			scn->data_list[savedIndx].uniform_colors(Eigen::Vector3d(51.0 / 255.0, 43.0 / 255.0, 33.3 / 255.0),
-				Eigen::Vector3d(255.0 / 255.0, 228.0 / 255.0, 58.0 / 255.0),
-				Eigen::Vector3d(255.0 / 255.0, 235.0 / 255.0, 80.0 / 255.0));
+			std::cout << closest << std::endl;
+			scn->selected_data_index = closest;
+			// When head is picked - pick the son
+			if (scn->data().head_of_snake)
+				scn->selected_data_index = scn->data().index_of_son;
+			coloring_with_snake_head(scn, savedIndx);
 		}
-
-		//scn->worldSelect = true;
 		rndr->UpdatePosition(x2, y2);
 
 	}
 }
-
 
 //static void glfw_char_mods_callback(GLFWwindow* window, unsigned int codepoint, int modifier)
 //{
@@ -219,13 +239,17 @@ static void glfw_key_callback(GLFWwindow* window, int key, int scancode, int act
 			scn->worldSelect = false;
 			int savedIndx = scn->selected_data_index;
 			scn->selected_data_index =
-				(scn->selected_data_index + scn->data_list.size() + (key == '2' ? 1 : -1)) % scn->data_list.size();
-			scn->data().uniform_colors(Eigen::Vector3d(1.0, 0.0, 0.0),
-				Eigen::Vector3d(0.5, 0.3, 0.35),
-				Eigen::Vector3d(1.0, 0.5, 0.5));
-			scn->data_list[savedIndx].uniform_colors(Eigen::Vector3d(51.0 / 255.0, 43.0 / 255.0, 33.3 / 255.0),
-				Eigen::Vector3d(255.0 / 255.0, 228.0 / 255.0, 58.0 / 255.0),
-				Eigen::Vector3d(255.0 / 255.0, 235.0 / 255.0, 80.0 / 255.0));
+				(scn->selected_data_index + scn->data_list.size() + (key == '2' ? 1 : -1)) % scn->data_list.size();			
+			// When head is picked - pick the son
+			if (scn->data().head_of_snake) {
+				if (key == '1') {
+					scn->selected_data_index = scn->data().index_of_son;
+				}
+				else 
+					scn->selected_data_index =
+					(scn->selected_data_index + scn->data_list.size() + 1) % scn->data_list.size();
+			}
+			coloring_with_snake_head(scn, savedIndx);
 			break;
 		}
 		case '3':
