@@ -79,6 +79,7 @@ bool read_Meshes(igl::opengl::glfw::Viewer* viewer, string file, int amountOfCy,
 
 		igl::opengl::ViewerData* curr = nullptr;
 		igl::opengl::ViewerData* prev = nullptr;
+		igl::opengl::ViewerData* headOfSnake = nullptr;
 
 		for (int i = 0; i < viewer->data_list.size(); i++) {
 			if (strcmp(&(viewer->data_list[i].model)[0], "sphere")) {
@@ -89,6 +90,16 @@ bool read_Meshes(igl::opengl::glfw::Viewer* viewer, string file, int amountOfCy,
 				}
 				prev = curr;
 			}
+			else if(!headOfSnake) {
+				headOfSnake = &viewer->data_list[i];
+				headOfSnake->model = "ycylinder";
+
+			}
+		}
+		// Connect sphere to last cylinder
+		if (prev && headOfSnake) {
+			headOfSnake->son = prev;
+			prev->father = headOfSnake;
 		}
 
 		return true;
@@ -101,10 +112,11 @@ bool read_Meshes(igl::opengl::glfw::Viewer* viewer, string file, int amountOfCy,
 
 void adjustModels(igl::opengl::glfw::Viewer* viewer, int times) {
 	bool first = true;
+	bool firstSphere = true;
 	int i;
 	float counter = 0;
 	float counterSh = 1;
-	float lenOfCy;
+	float lenOfCy, girthOfCy, widOfCy;
 	Eigen::Vector3d m;
 	Eigen::Vector3d M;
 	Eigen::MatrixXd axisPoints(6, 3);
@@ -118,7 +130,7 @@ void adjustModels(igl::opengl::glfw::Viewer* viewer, int times) {
 		curr->show_overlay_depth = false;
 
 		if (!(strcmp(&curr->model[0], "sphere"))) {
-			viewer->spheres.push_back(curr);						
+			viewer->spheres.push_back(curr);
 			curr->MyTranslate(Eigen::Vector3f(5 * counterSh++, 0/*20 + counterSh*2*/, 0));
 			curr->direction = Eigen::Vector3f(0, -1, 0);
 			curr->velocity = 0.1f;
@@ -149,6 +161,8 @@ void adjustModels(igl::opengl::glfw::Viewer* viewer, int times) {
 					0, 5;
 
 				lenOfCy = M(1) - m(1);
+				widOfCy = M(0) - m(0);
+				girthOfCy = M(2) - m(2);
 				viewer->lengthOfArm = lenOfCy * times;				
 				cout << viewer->lengthOfArm << endl;
 				first = false;
@@ -172,10 +186,21 @@ void adjustModels(igl::opengl::glfw::Viewer* viewer, int times) {
 			//	);
 			//}
 
-			if (curr->son != nullptr)
+			if (curr->son != nullptr && curr->father)
 				curr->MyTranslate(Eigen::Vector3f(0, lenOfCy, 0));
+			// top
+			if (!curr->father) {				
+				m = curr->V.colwise().minCoeff();
+				M = curr->V.colwise().maxCoeff();
+				float widOfSphere = M(0) - m(0);
+				float girthOfSphere = M(2) - m(2);
+				float lengthOfSphere = M(1) - m(0);
+				curr->MyTranslate(Eigen::Vector3f(0, lengthOfSphere-0.8, 0));
+				curr->MyScale(Eigen::Vector3f(widOfCy / widOfSphere, 1.2, girthOfCy / girthOfSphere));
+			}
 
-			curr->SetCenterOfRotation(curr->bottom);	
+			curr->SetCenterOfRotation(curr->bottom);
+
 		}
 
 	}
@@ -195,7 +220,7 @@ int main(int argc, char* argv[])
 
 	// Assignment 3 //
 
-	int cyNum = 15, shNum = 1;
+	int cyNum = 4, shNum = 2;
 	if (!(read_Meshes(&viewer, "configuration.txt", cyNum, shNum))) return 1;
 	adjustModels(&viewer, cyNum);
 

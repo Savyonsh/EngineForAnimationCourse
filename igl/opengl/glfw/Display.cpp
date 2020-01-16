@@ -143,7 +143,7 @@ bool Display::launch_rendering(bool loop)
 	// Finding the first and last cylinder, finding shprere
 	for (unsigned int i = 0; i < scn->data_list.size(); i++) {
 		if (strcmp(&scn->data_list[i].model[0], "sphere") && !scn->data_list[i].father) {
-			last = &scn->data_list[i];
+			last = scn->data_list[i].son;
 			//saving the index of the last cylinder - the top
 			index_top = i;
 		}
@@ -187,23 +187,23 @@ bool Display::launch_rendering(bool loop)
 			if (distance <= scn->lengthOfArm)
 			{
 				CalculateIK(scn, last, destPoint);
-				// check if there is an intersection between the top and the selected sphere
-				if (scn->isIntersection(index_top, scn->selected_data_index)) {
-					scn->isIk = false;
-					//scn->data().should_appear = false;
-					scn->data().move_model = false;
-				}
-
-				//float delta;
-				//Eigen::Vector3f top = last->getTopInWorld(scn->MakeTrans());
-				//delta = sqrt(pow(destPoint(0) - top(0), 2) +
-				//	pow(destPoint(1) - top(1), 2) +
-				//	pow(destPoint(2) - top(2), 2));				
-				//if (delta <= 0.1 && delta > 0) {
+				//// check if there is an intersection between the top and the selected sphere
+				//if (scn->isIntersection(index_top, scn->selected_data_index)) {
 				//	scn->isIk = false;
-				//	scn->data().should_appear = false;
+				//	//scn->data().should_appear = false;
 				//	scn->data().move_model = false;
 				//}
+
+				float delta;
+				Eigen::Vector3f top = last->getTopInWorld(scn->MakeTrans());
+				delta = sqrt(pow(destPoint(0) - top(0), 2) +
+					pow(destPoint(1) - top(1), 2) +
+					pow(destPoint(2) - top(2), 2));				
+				if (delta <= 0.1 && delta > 0) {
+					scn->isIk = false;
+					scn->data().should_appear = false;
+					scn->data().move_model = false;
+				}
 			}
 			else {
 				cout << "Distance too far." << endl;
