@@ -233,6 +233,10 @@ void add_texture_to_list_of_datas(igl::opengl::glfw::Viewer& viewer, char* image
 	// Loading the image
 	int width, height, n;
 	unsigned char* data = stbi_load(image_path, &width, &height, &n, 4);
+	if (data == nullptr) {
+		std::cout << "Couldn't open the image at path: " << std::endl << image_path << std::endl;
+		return;
+	}
 	Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> R(width, height), G(width, height), B(width, height), A(width, height);
 	
 	// Tamir version
@@ -288,7 +292,7 @@ int main(int argc, char* argv[])
 	if (!(read_Meshes(&viewer, "configuration.txt", cyNum, shNum))) return 1;
 	adjustModels(&viewer, cyNum);
 
-	// add_texture_to_list_of_datas(viewer, "E:/Users/Shaked/Documents/OneDrive/C++/GitHub/FinalProject/tutorial/resources/snake.png", std::vector<int>{0,1,2,3}, true, 5);
+	add_texture_to_list_of_datas(viewer, "E:/Users/Shaked/Documents/OneDrive/C++/GitHub/FinalProject/tutorial/resources/snake3.png", std::vector<int>{0,1,2,3}, true, 5);
 
 	Init(*disp);
 	renderer.init(&viewer);
