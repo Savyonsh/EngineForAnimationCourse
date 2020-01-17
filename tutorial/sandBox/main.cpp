@@ -1,9 +1,11 @@
 
 #include "igl/opengl/glfw/renderer.h"
 #include "tutorial/sandBox/inputManager.h"
+#include "tutorial/sandBox/stb_image.h" // Texture
 #include <iostream>
 #include <fstream>
 #include <string.h>
+#include <vector>
 
 using namespace std;
 
@@ -219,6 +221,57 @@ void adjustModels(igl::opengl::glfw::Viewer* viewer, int times) {
 	viewer->MyTranslate(Eigen::Vector3f(-1, -2, -7));
 }
 
+/*
+* Explaing the function:
+* image_path - will take a string, which show the path of the image file to load as a texture.
+* data_ids = a list of ViewerData's ids (so we can use viewer.data_list[i]), each of those ids get the new texture.
+* makeItBigger - if true, it will make the texture repeat itself less times, else, it will repeat itself more times.
+* multi - a multiplier of how many times to make it repeat (doesn't have to an integer).
+*/
+void add_texture_to_list_of_datas(igl::opengl::glfw::Viewer& viewer, char* image_path, std::vector<int> data_ids, bool makeItBigger, double multi) {
+
+	// Loading the image
+	int width, height, n;
+	unsigned char* data = stbi_load(image_path, &width, &height, &n, 4);
+	Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic> R(width, height), G(width, height), B(width, height), A(width, height);
+	
+	// Tamir version
+	// It doesn't work if the image's height!=width
+	/*for (unsigned int j = 0; j < height; ++j) {
+		for (unsigned int i = 0; i < width; ++i) {
+			R(j, i) = data[4 * ((width - 1 - i) + width * (height - 1 - j))];
+			G(j, i) = data[4 * ((width - 1 - i) + width * (height - 1 - j)) + 1];
+			B(j, i) = data[4 * ((width - 1 - i) + width * (height - 1 - j)) + 2];
+			A(j, i) = data[4 * ((width - 1 - i) + width * (height - 1 - j)) + 3];
+		}
+	}*/
+	
+	// igl::png::readPNG version
+	for (unsigned i = 0; i < height; ++i) {
+		for (unsigned j = 0; j < width; ++j) {
+			R(j, height - 1 - i) = data[4 * (j + width * i) + 0];
+			G(j, height - 1 - i) = data[4 * (j + width * i) + 1];
+			B(j, height - 1 - i) = data[4 * (j + width * i) + 2];
+			A(j, height - 1 - i) = data[4 * (j + width * i) + 3];
+		}
+	}
+	
+	stbi_image_free(data); // data is stored in R/G/B/A, no need for data anymore.
+
+	// Set the texture to each of the ViewerData in the list
+	for (int& i : data_ids) {
+		viewer.data_list[i].show_texture = true;
+
+		if (makeItBigger)
+			viewer.data_list[i].set_uv(viewer.data_list[i].V_uv / multi, viewer.data_list[i].F_uv / multi);
+		else
+			viewer.data_list[i].set_uv(viewer.data_list[i].V_uv * multi, viewer.data_list[i].F_uv * multi);
+
+		viewer.data_list[i].set_texture(R, G, B, A);
+		// viewer.data_list[i].grid_texture(); // What is it even for?
+	}
+}
+
 int main(int argc, char* argv[])
 {
 	Display* disp = new Display(1000, 800, "Wellcome");
@@ -234,6 +287,8 @@ int main(int argc, char* argv[])
 	int cyNum = 4, shNum = 1;
 	if (!(read_Meshes(&viewer, "configuration.txt", cyNum, shNum))) return 1;
 	adjustModels(&viewer, cyNum);
+
+	// add_texture_to_list_of_datas(viewer, "E:/Users/Shaked/Documents/OneDrive/C++/GitHub/FinalProject/tutorial/resources/snake.png", std::vector<int>{0,1,2,3}, true, 5);
 
 	Init(*disp);
 	renderer.init(&viewer);
