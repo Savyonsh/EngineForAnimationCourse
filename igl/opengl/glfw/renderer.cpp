@@ -65,34 +65,34 @@ IGL_INLINE void Renderer::draw(GLFWwindow* window)
 
 	for (auto& core : core_list)
 	{
-		//for (auto& mesh : scn->data_list) // Original
-		//{
-		//	if (mesh.is_visible & core.id)
-		//	{
-		//		core.draw(scn->MakeTrans(), mesh);
-		//	}
-		//}
+		for (auto& mesh : scn->data_list) // Original
+		{
+			if (mesh.is_visible & core.id)
+			{
+				core.draw(scn->MakeTrans(), mesh);
+			}
+		}
 
-		//-------Shaked-------//
-		//if (mesh->is_visible & core.id) {
-		Eigen::Matrix4f product = scn->MakeTrans();
-		igl::opengl::ViewerData* mesh;
-		for (int i = 0; i < scn->data_list.size(); i++) {
-			mesh = &(scn->data_list[i]);
-			if (!(strcmp(&(mesh->model[0]), "sphere"))) {
-				if (mesh->should_appear)
-					core.draw(scn->MakeTrans(), *mesh);				
-			}
-			else {
-				if (mesh->son != nullptr) {
-					product = product * mesh->son->MakeTrans();
-					core.draw(product, *mesh);
-				}
-				else {
-					core.draw(product, *mesh);
-				}
-			}
-		}		
+		////-------Shaked-------//
+		////if (mesh->is_visible & core.id) {
+		//Eigen::Matrix4f product = scn->MakeTrans();
+		//igl::opengl::ViewerData* mesh;
+		//for (int i = 0; i < scn->data_list.size(); i++) {
+		//	mesh = &(scn->data_list[i]);
+		//	if (!(strcmp(&(mesh->model[0]), "sphere"))) {
+		//		if (mesh->should_appear)
+		//			core.draw(scn->MakeTrans(), *mesh);				
+		//	}
+		//	else {
+		//		if (mesh->son != nullptr) {
+		//			product = product * mesh->son->MakeTrans();
+		//			core.draw(product, *mesh);
+		//		}
+		//		else {
+		//			core.draw(product, *mesh);
+		//		}
+		//	}
+		//}		
 		////--------------------//
 	}
 
@@ -103,12 +103,44 @@ void Renderer::SetScene(igl::opengl::glfw::Viewer* viewer)
 	scn = viewer;
 }
 
-IGL_INLINE void Renderer::init(igl::opengl::glfw::Viewer* viewer)
+IGL_INLINE void Renderer::init(igl::opengl::glfw::Viewer* viewer, int height, int width)
 {
-	scn = viewer;
-	core().init(); 
+	// Original
+	//scn = viewer;
+	//core().init(); 
+	//core().align_camera_center(scn->data().V, scn->data().F);
 
+	scn = viewer;
+	core().init();
 	core().align_camera_center(scn->data().V, scn->data().F);
+	//--------Shaked-------//
+	// core() is like data(), meaning there is core_list in there, but in this case it's private so we have to use the "fake" id of each core if we want to change between them.
+	core().viewport = Eigen::Vector4f(0, 0, width, height); // set the first camera to be normal (the whole screen).
+	append_core(Eigen::Vector4f(0, 0, width / 2, height / 2)); // second camera will be at the button left of the screen, at the size of 1/4 of the screen.
+	selected_core_index = 0; // append_core change the selected camera to the new one, I changed it back to the main screen so Picking() and other function will work according to the main one.
+
+	for (int i = 0; i < viewer->data_list.size(); i++) {
+		core_list[1].toggle(viewer->data_list[i].show_faces);   // To show mesh itself
+		core_list[1].toggle(viewer->data_list[i].show_overlay); // To show edges / points
+	}
+	// Those are the default values of the eye (each of them is Vector3f), no need to init here as default values, unless we want it to be different.
+	//core_list[1].camera_eye << 0, 0, 5;
+	//core_list[1].camera_up << 0, 1, 0;
+	//core_list[1].camera_translation << 0, 0, 0;
+	Eigen::Vector3d M = viewer->data_list[2].V.colwise().maxCoeff();
+	Eigen::Vector3d m = viewer->data_list[2].V.colwise().minCoeff();
+	core_list[1].camera_translation = (viewer->data_list[2].MakeTrans() * Eigen::Vector4f(0, -(M(1) - m(1)), 0, 1)).block<3, 1>(0, 0);
+
+	core_list[1].camera_eye = Eigen::Vector3f(0, -3, 0);
+	core_list[1].camera_up = Eigen::Vector3f(0, 0, 1);
+
+	
+	
+	//core_list[1].camera_center = (viewer->data_list[2].MakeTrans() * Eigen::Vector4f(0, 0, 0, 1)).block<3, 1>(0, 0);
+
+	// Uncomment this if you want the camera to look exactly at data_list[0]
+	//core_list[1].camera_translation = -viewer->data_list[0].getBottomInWorld(viewer->MakeTrans()) + Eigen::Vector3f(0,0,3);
+	//---------------------//
 }
 
 void Renderer::UpdatePosition(double xpos, double ypos)
@@ -145,6 +177,12 @@ void Renderer::MouseProcessing(int button)
 			// scn->data().MyRotate(Eigen::Vector3f(0, 0, 1), yrel / 180.0f, true);
 			scn->data().MyRotateX(xrel / 180.0f);
 			scn->data().MyRotateY(yrel / 180.0f);
+			Vector4f camera_trans(core_list[1].camera_translation(0), core_list[1].camera_translation(1), core_list[1].camera_translation(2), 1);
+			Vector4f camera_eye(core_list[1].camera_eye(0), core_list[1].camera_eye(1), core_list[1].camera_eye(2), 1);
+			Vector4f camera_up(core_list[1].camera_up(0), core_list[1].camera_up(2), core_list[1].camera_up(2), 1);
+			core_list[1].camera_translation = (scn->data_list[2].MakeTrans() * camera_trans).block<3, 1>(0, 0);
+			core_list[1].camera_eye = (scn->data_list[2].MakeTrans() * camera_eye).block<3, 1>(0, 0);
+			core_list[1].camera_up = (scn->data_list[2].MakeTrans() * camera_up).block<3, 1>(0, 0);
 		}
 	}
 
@@ -253,6 +291,24 @@ IGL_INLINE void Renderer::resize(GLFWwindow* window,int w, int h)
 
 	IGL_INLINE void Renderer::post_resize(GLFWwindow* window, int w, int h)
 	{
+		//if (core_list.size() == 1)
+		//{
+		//	core().viewport = Eigen::Vector4f(0, 0, w, h);
+		//}
+		//else
+		//{
+		//	// It is up to the user to define the behavior of the post_resize() function
+		//	// when there are multiple viewports (through the `callback_post_resize` callback)
+		//}
+		////for (unsigned int i = 0; i < plugins.size(); ++i)
+		////{
+		////	plugins[i]->post_resize(w, h);
+		////}
+		//if (callback_post_resize)
+		//{
+		//	callback_post_resize(window, w, h);
+		//}
+
 		if (core_list.size() == 1)
 		{
 			core().viewport = Eigen::Vector4f(0, 0, w, h);
@@ -261,6 +317,12 @@ IGL_INLINE void Renderer::resize(GLFWwindow* window,int w, int h)
 		{
 			// It is up to the user to define the behavior of the post_resize() function
 			// when there are multiple viewports (through the `callback_post_resize` callback)
+
+			//--------Shaked-------//
+			// When resizing the window it will keep the camera the same way.
+			core_list[0].viewport = Eigen::Vector4f(0, 0, w, h);
+			core_list[1].viewport = Eigen::Vector4f(0, 0, w / 2, h / 2);
+			//---------------------//
 		}
 		//for (unsigned int i = 0; i < plugins.size(); ++i)
 		//{

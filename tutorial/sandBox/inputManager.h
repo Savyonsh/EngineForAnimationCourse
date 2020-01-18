@@ -20,13 +20,13 @@ void coloring_with_snake_head(igl::opengl::glfw::Viewer* scn, int savedIndx) {
 	// "Uncolor" last picked object
 	// if the last picked model is the son of head - uncolor head as well
 	if (scn->data_list[savedIndx].father && scn->data_list[savedIndx].father->head_of_snake) {
-		scn->data_list[savedIndx].father->uniform_colors(Eigen::Vector3d(51.0 / 255.0, 43.0 / 255.0, 33.3 / 255.0),
-			Eigen::Vector3d(255.0 / 255.0, 228.0 / 255.0, 58.0 / 255.0),
-			Eigen::Vector3d(255.0 / 255.0, 235.0 / 255.0, 80.0 / 255.0));
+		scn->data_list[savedIndx].father->uniform_colors(Eigen::Vector3d(0.55, 0.5, 0.45),
+			Eigen::Vector3d(0.45, 0.4, 0.35),
+			Eigen::Vector3d(0.5, 0.5, 0.5));
 	}
-	scn->data_list[savedIndx].uniform_colors(Eigen::Vector3d(51.0 / 255.0, 43.0 / 255.0, 33.3 / 255.0),
-		Eigen::Vector3d(255.0 / 255.0, 228.0 / 255.0, 58.0 / 255.0),
-		Eigen::Vector3d(255.0 / 255.0, 235.0 / 255.0, 80.0 / 255.0));
+	scn->data_list[savedIndx].uniform_colors(Eigen::Vector3d(0.55, 0.5, 0.45),
+		Eigen::Vector3d(0.45, 0.4, 0.35),
+		Eigen::Vector3d(0.5, 0.5, 0.5));
 }
 
 static void glfw_mouse_press(GLFWwindow* window, int button, int action, int modifier)

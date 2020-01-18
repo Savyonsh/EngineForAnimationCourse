@@ -242,9 +242,12 @@ namespace glfw
     }
 
     data().compute_normals();
-    data().uniform_colors(Eigen::Vector3d(51.0/255.0,43.0/255.0,33.3/255.0),
-                   Eigen::Vector3d(255.0/255.0,228.0/255.0,58.0/255.0),
-                   Eigen::Vector3d(255.0/255.0,235.0/255.0,80.0/255.0));
+    //data().uniform_colors(Eigen::Vector3d(51.0/255.0,43.0/255.0,33.3/255.0),
+    //               Eigen::Vector3d(255.0/255.0,228.0/255.0,58.0/255.0),
+    //               Eigen::Vector3d(255.0/255.0,235.0/255.0,80.0/255.0));
+	data().uniform_colors(Eigen::Vector3d(0.55, 0.5, 0.45),
+		Eigen::Vector3d(0.45, 0.4, 0.35),
+		Eigen::Vector3d(0.5, 0.5, 0.5));
 
     // Alec: why?
     if (data().V_uv.rows() == 0)

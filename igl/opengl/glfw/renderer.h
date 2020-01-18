@@ -13,7 +13,7 @@ public:
 	Renderer();
 	~Renderer();
 	IGL_INLINE void draw( GLFWwindow* window);
-	IGL_INLINE void init(igl::opengl::glfw::Viewer* scn);
+	IGL_INLINE void init(igl::opengl::glfw::Viewer* scn, int height, int width);
 	
 	//IGL_INLINE bool key_pressed(unsigned int unicode_key, int modifiers);
 

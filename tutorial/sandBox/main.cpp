@@ -121,7 +121,7 @@ void adjustModels(igl::opengl::glfw::Viewer* viewer, int times) {
 	bool firstSphere = true;
 	int i;
 	float counter = 0;
-	float counterSh = 1;
+	float counterSh = 0;
 	float lenOfCy, girthOfCy, widOfCy;
 	Eigen::Vector3d m;
 	Eigen::Vector3d M;
@@ -137,13 +137,17 @@ void adjustModels(igl::opengl::glfw::Viewer* viewer, int times) {
 
 		if (!(strcmp(&curr->model[0], "sphere"))) {
 			viewer->spheres.push_back(curr);
-			curr->MyTranslate(Eigen::Vector3f(5 * counterSh++, 0/*20 + counterSh*2*/, 0));
+			curr->MyTranslate(Eigen::Vector3f(0, 5*counterSh++, 0));
 			curr->direction = Eigen::Vector3f(0, -1, 0);
 			curr->velocity = 0.1f;
 			curr->show_lines = false;
 			curr->bottomF = Vector4f(curr->V.colwise().minCoeff().cast<float>()(0),
 				curr->V.colwise().minCoeff().cast<float>()(1),
 				curr->V.colwise().minCoeff().cast<float>()(2), 1);
+			m = curr->V.colwise().minCoeff();
+			M = curr->V.colwise().maxCoeff();
+			curr->top << 0, M(1), 0;
+			curr->topF << 0, M(1), 0, 1;
 		}
 		else {
 			counter++;
@@ -197,7 +201,7 @@ void adjustModels(igl::opengl::glfw::Viewer* viewer, int times) {
 				curr->MyTranslate(Eigen::Vector3f(0, lenOfCy, 0));
 			
 			// head of snake
-			if (!curr->father) {
+			if (!curr->father && curr->son) {
 				curr->son->MyScale(Eigen::Vector3f(1, 0.5, 1));
 				curr->son->MyTranslate(Eigen::Vector3f(0, -(lenOfCy * 0.5) / 2, 0));
 				m = curr->V.colwise().minCoeff();
@@ -218,7 +222,7 @@ void adjustModels(igl::opengl::glfw::Viewer* viewer, int times) {
 	}
 	// Adjusting the "camera"
 	//viewer->MyTranslate(Eigen::Vector3f(-8, -10, -30));
-	viewer->MyTranslate(Eigen::Vector3f(-1, -2, -7));
+	//viewer->MyTranslate(Eigen::Vector3f(-1, -2, -7));
 }
 
 /*
@@ -288,14 +292,18 @@ int main(int argc, char* argv[])
 
 	// Assignment 3 //
 
-	int cyNum = 4, shNum = 1;
-	if (!(read_Meshes(&viewer, "configuration.txt", cyNum, shNum))) return 1;
-	adjustModels(&viewer, cyNum);
-
-	add_texture_to_list_of_datas(viewer, "E:/Users/Shaked/Documents/OneDrive/C++/GitHub/FinalProject/tutorial/resources/snake3.png", std::vector<int>{0,1,2,3}, true, 5);
-
+	int cyNum = 0, shNum = 3;
+	//if (!(read_Meshes(&viewer, "configuration.txt", cyNum, shNum))) return 1;
+	viewer.load_mesh_from_file("C:/Users/Sharon/source/repos/Project/tutorial/data/bunny.off");
+	viewer.load_mesh_from_file("C:/Users/Sharon/source/repos/Project/tutorial/data/cube.obj");
+	viewer.load_mesh_from_file("C:/Users/Sharon/source/repos/Project/tutorial/data/sphere.obj");
+	
+	//adjustModels(&viewer, cyNum);
+	//add_texture_to_list_of_datas(viewer, "SnakeSkin.png", std::vector<int>{0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15}, true, 5);
+	
 	Init(*disp);
-	renderer.init(&viewer);
+	renderer.init(&viewer,800, 1000);
+	
 	disp->SetRenderer(&renderer);
 	disp->launch_rendering(true);
 	delete disp;

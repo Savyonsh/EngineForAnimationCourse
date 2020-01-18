@@ -156,7 +156,7 @@ bool Display::launch_rendering(bool loop)
 	{
 		// Falling animation for spheres 
 		for (auto sphere : scn->spheres) {
-			if (sphere->should_appear) {
+			if (sphere->should_appear) {				
 				if ((scn->MakeTrans() * sphere->MakeTrans() * sphere->bottomF)(1)
 								  <= first->getBottomInWorld(scn->MakeTrans())(1)) {
 					if ((sphere->direction(1) > 0 && sphere->velocity < 0.02))
