@@ -96,7 +96,7 @@ public:
   Eigen::Vector3f getBottomInWorld(Eigen::Matrix4f& world);
 
   //Feilds:
-  string model;
+  string model; // LAMA ZE LO INT?! 1=CY, 2=BALL, 3=BUNNY, ETC
   ViewerData* father = nullptr;
   ViewerData* son = nullptr; 
   Vector3f top;
@@ -129,7 +129,7 @@ public:
   bool move_model = false;
   bool should_appear = true;
 
-  
+  void UpdateCamera(Eigen::Vector3f& eye, Eigen::Vector3f& up, Eigen::Vector3f& translation);
 
   //---------------------------------------------------------------------------------------//
   IGL_INLINE void set_visible(bool value, unsigned int core_id = 1);

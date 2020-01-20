@@ -122,19 +122,23 @@ IGL_INLINE void Renderer::init(igl::opengl::glfw::Viewer* viewer, int height, in
 	for (int i = 0; i < viewer->data_list.size(); i++) {
 		core_list[1].toggle(viewer->data_list[i].show_faces);   // To show mesh itself
 		core_list[1].toggle(viewer->data_list[i].show_overlay); // To show edges / points
+		// core_list[1].toggle(viewer->data_list[i].show_texture); // To show texture
 	}
 	// Those are the default values of the eye (each of them is Vector3f), no need to init here as default values, unless we want it to be different.
 	//core_list[1].camera_eye << 0, 0, 5;
 	//core_list[1].camera_up << 0, 1, 0;
 	//core_list[1].camera_translation << 0, 0, 0;
-	Eigen::Vector3d M = viewer->data_list[2].V.colwise().maxCoeff();
-	Eigen::Vector3d m = viewer->data_list[2].V.colwise().minCoeff();
-	core_list[1].camera_translation = (viewer->data_list[2].MakeTrans() * Eigen::Vector4f(0, -(M(1) - m(1)), 0, 1)).block<3, 1>(0, 0);
 
-	core_list[1].camera_eye = Eigen::Vector3f(0, -3, 0);
-	core_list[1].camera_up = Eigen::Vector3f(0, 0, 1);
-
-	
+	unsigned int i = 0;
+	for (; i < viewer->data_list.size(); i++) {
+		if (strcmp(&viewer->data_list[i].model[0], "sphere") && !viewer->data_list[i].son)
+			break;
+	}
+	if (i == viewer->data_list.size()) {
+		std::cout << "Error no cylinder found, error at Renderer::init(...)" << std::endl;
+		exit(1);
+	}
+	viewer->data_list[i].UpdateCamera(core_list[1].camera_eye, core_list[1].camera_up, core_list[1].camera_translation);
 	
 	//core_list[1].camera_center = (viewer->data_list[2].MakeTrans() * Eigen::Vector4f(0, 0, 0, 1)).block<3, 1>(0, 0);
 

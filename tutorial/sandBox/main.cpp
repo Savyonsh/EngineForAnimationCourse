@@ -293,10 +293,13 @@ int main(int argc, char* argv[])
 	// Assignment 3 //
 
 	int cyNum = 0, shNum = 3;
-	//if (!(read_Meshes(&viewer, "configuration.txt", cyNum, shNum))) return 1;
+	// if (!(read_Meshes(&viewer, "configuration.txt", cyNum, shNum))) return 1;
 	viewer.load_mesh_from_file("C:/Users/Sharon/source/repos/Project/tutorial/data/bunny.off");
 	viewer.load_mesh_from_file("C:/Users/Sharon/source/repos/Project/tutorial/data/cube.obj");
 	viewer.load_mesh_from_file("C:/Users/Sharon/source/repos/Project/tutorial/data/sphere.obj");
+	/*viewer.load_mesh_from_file("E:/Users/Shaked/Documents/OneDrive/C++/GitHub/FinalProject/tutorial/data/bunny.off");
+	viewer.load_mesh_from_file("E:/Users/Shaked/Documents/OneDrive/C++/GitHub/FinalProject/tutorial/data/cube.obj");
+	viewer.load_mesh_from_file("E:/Users/Shaked/Documents/OneDrive/C++/GitHub/FinalProject/tutorial/data/sphere.obj");*/
 	
 	//adjustModels(&viewer, cyNum);
 	//add_texture_to_list_of_datas(viewer, "SnakeSkin.png", std::vector<int>{0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15}, true, 5);
