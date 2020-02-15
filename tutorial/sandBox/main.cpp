@@ -87,7 +87,6 @@ bool read_Meshes(igl::opengl::glfw::Viewer* viewer, string file, int amountOfCy,
 		for (int i = 0; i < viewer->data_list.size(); i++) {
 			if (strcmp(&(viewer->data_list[i].model)[0], "sphere")) {
 				curr = &viewer->data_list[i];
-				curr->index = i;
 				curr->son = prev;
 				if (prev) {
 					prev->father = curr;
@@ -95,18 +94,19 @@ bool read_Meshes(igl::opengl::glfw::Viewer* viewer, string file, int amountOfCy,
 				prev = curr;
 				index_of_son = i;
 			}
-			//else if(!headOfSnake) {
-			//	headOfSnake = &viewer->data_list[i];
-			//	headOfSnake->model = "ycylinder";
-			//	headOfSnake->head_of_snake = true;
-			//}
+			else if(!headOfSnake) {
+				headOfSnake = &viewer->data_list[i];
+				headOfSnake->model = "ycylinder";
+				headOfSnake->head_of_snake = true;
+
+			}
 		}
-		//// Connect sphere to last cylinder
-		//if (prev && headOfSnake) {
-		//	headOfSnake->son = prev;
-		//	prev->father = headOfSnake;
-		//	headOfSnake->index_of_son = index_of_son;
-		//}
+		// Connect sphere to last cylinder
+		if (prev && headOfSnake) {
+			headOfSnake->son = prev;
+			prev->father = headOfSnake;
+			headOfSnake->index_of_son = index_of_son;
+		}
 
 		return true;
 	}
@@ -137,7 +137,7 @@ void adjustModels(igl::opengl::glfw::Viewer* viewer, int times) {
 
 		if (!(strcmp(&curr->model[0], "sphere"))) {
 			viewer->spheres.push_back(curr);
-			curr->MyTranslate(Eigen::Vector3f(5* counterSh, 5*counterSh++, 0));
+			curr->MyTranslate(Eigen::Vector3f(4*counterSh, 5*counterSh++, 0));
 			curr->direction = Eigen::Vector3f(0, -1, 0);
 			curr->velocity = 0.1f;
 			curr->show_lines = false;
@@ -174,7 +174,6 @@ void adjustModels(igl::opengl::glfw::Viewer* viewer, int times) {
 				widOfCy = M(0) - m(0);
 				girthOfCy = M(2) - m(2);
 				viewer->lengthOfArm = lenOfCy * times;
-				cout << viewer->lengthOfArm << endl;
 				first = false;
 			}
 
@@ -197,23 +196,23 @@ void adjustModels(igl::opengl::glfw::Viewer* viewer, int times) {
 			//}
 
 			// in between
-			if (curr->son /*&& curr->father*/)
+			if (curr->son && curr->father)
 				curr->MyTranslate(Eigen::Vector3f(0, lenOfCy, 0));
 			
-			//// head of snake
-			//if (!curr->father && curr->son) {
-			//	curr->son->MyScale(Eigen::Vector3f(1, 0.5, 1));
-			//	curr->son->MyTranslate(Eigen::Vector3f(0, -(lenOfCy * 0.5) / 2, 0));
-			//	m = curr->V.colwise().minCoeff();
-			//	M = curr->V.colwise().maxCoeff();
-			//	float widOfSphere = M(0) - m(0);
-			//	float girthOfSphere = M(2) - m(2);
-			//	float lengthOfSphere = M(1) - m(0);
-			//	curr->MyTranslate(-Eigen::Vector3f(0, -(lenOfCy * 0.5) / 2, 0));
-			//	curr->MyTranslate(Eigen::Vector3f(0, -lenOfCy / 2 + 0.3, 0));
-			//	curr->MyScale(Eigen::Vector3f(1, 2, 1));
-			//	curr->MyScale(Eigen::Vector3f(widOfCy / widOfSphere, 1.2, girthOfCy / girthOfSphere));
-			//}
+			// head of snake
+			if (!curr->father && curr->son) {
+				curr->son->MyScale(Eigen::Vector3f(1, 0.5, 1));
+				curr->son->MyTranslate(Eigen::Vector3f(0, -(lenOfCy * 0.5) / 2, 0));
+				m = curr->V.colwise().minCoeff();
+				M = curr->V.colwise().maxCoeff();
+				float widOfSphere = M(0) - m(0);
+				float girthOfSphere = M(2) - m(2);
+				float lengthOfSphere = M(1) - m(0);
+				curr->MyTranslate(-Eigen::Vector3f(0, -(lenOfCy * 0.5) / 2, 0));
+				curr->MyTranslate(Eigen::Vector3f(0, -lenOfCy / 2 + 0.3, 0));
+				curr->MyScale(Eigen::Vector3f(1, 2, 1));
+				curr->MyScale(Eigen::Vector3f(widOfCy / widOfSphere, 1.2, girthOfCy / girthOfSphere));
+			}
 
 			curr->SetCenterOfRotation(curr->bottom);
 

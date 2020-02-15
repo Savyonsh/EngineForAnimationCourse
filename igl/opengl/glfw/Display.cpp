@@ -138,6 +138,7 @@ bool Display::launch_rendering(bool loop)
 	// Assignment 3 
 	igl::opengl::ViewerData* last = nullptr;
 	igl::opengl::ViewerData* first = nullptr;
+	igl::opengl::ViewerData* current = nullptr;
 	Vector3f destPoint;
 	int index_top = 0;
 	// Finding the first and last cylinder, finding shprere
@@ -152,6 +153,10 @@ bool Display::launch_rendering(bool loop)
 		}
 	}	
 
+
+	igl::AABB<Eigen::MatrixXd, 3> *tree0, *tree1 = &(scn->data_list[index_top].tree);
+	Eigen::Matrix4d model0, model1;
+	Eigen::Matrix3d Rot0, Rot1;
 	while (!glfwWindowShouldClose(window))
 	{
 		// Falling animation for spheres 
@@ -204,15 +209,17 @@ bool Display::launch_rendering(bool loop)
 					scn->data().should_appear = false;
 					scn->data().move_model = false;
 				}*/
-				igl::AABB<Eigen::MatrixXd, 3>* tree0 = &(scn->data().tree);
-				igl::AABB<Eigen::MatrixXd, 3>* tree1 = &(scn->data_list[10].tree);
-				Eigen::Matrix4d& model0 = scn->data().MakeTransD();
-				Eigen::Matrix4d model1 = scn->data_list[0].MakeTransD();
-				for (int i = 1; i <= 10; i++) {
-					model1 = model1 * scn->data_list[i].MakeTransD();
+				tree0 = &(scn->data().tree);
+				tree1 = &(last->tree);
+				model0 = scn->data().MakeTransD();
+				model1 = first->MakeTransD();
+				current = first;
+				while (current->father != nullptr) {
+					current = current->father;
+					model1 = model1 * current->MakeTransD();
 				}
-				Eigen::Matrix3d Rot0 = model0.block<3, 3>(0, 0);
-				Eigen::Matrix3d Rot1 = model1.block<3, 3>(0, 0);
+				Rot0 = model0.block<3, 3>(0, 0);
+				Rot1 = model1.block<3, 3>(0, 0);
 				bool result = scn->recursionIsIntersection(tree0, tree1, model0, model1, Rot0, Rot1);
 				if (result) {
 					scn->isIk = false;

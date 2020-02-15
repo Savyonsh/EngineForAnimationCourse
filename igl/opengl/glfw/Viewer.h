@@ -145,7 +145,7 @@ public:
 	bool isIk = false;
 
 	// Assignment 4
-    bool isIntersection(Eigen::Matrix4d& model0, Eigen::Matrix4d& model1, int model0Indx, int model1Indx);
+    bool isIntersection(int model0, int model1);
     bool isIntersectBox(Eigen::AlignedBox3d& box0, Eigen::AlignedBox3d& box1,
                         Eigen::Matrix4d& model0, Eigen::Matrix4d& model1,
                         Eigen::Matrix3d& Rot0, Eigen::Matrix3d& Rot1);

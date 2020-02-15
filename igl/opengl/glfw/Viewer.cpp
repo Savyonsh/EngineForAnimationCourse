@@ -538,36 +538,38 @@ namespace glfw
       return false;
   }
 
-  IGL_INLINE bool Viewer::isIntersection(Eigen::Matrix4d& model0, Eigen::Matrix4d& model1, int model0Indx, int model1Indx) {
-	  Eigen::Matrix3d Rot0 = model0.block<3, 3>(0, 0);
-	  Eigen::Matrix3d Rot1 = model1.block<3, 3>(0, 0);
-	  igl::AABB<Eigen::MatrixXd, 3>* tree0 = &data_list[model0Indx].tree;
-	  igl::AABB<Eigen::MatrixXd, 3>* tree1 = &data_list[model1Indx].tree;
+  IGL_INLINE bool Viewer::isIntersection(int index_model_1, int index_model_2) {
+      Eigen::Matrix4d model0 = data_list[index_model_1].MakeTransD();
+      Eigen::Matrix4d model1 = data_list[index_model_2].MakeTransD();
+      Eigen::Matrix3d Rot0 = model0.block<3, 3>(0, 0);
+      Eigen::Matrix3d Rot1 = model1.block<3, 3>(0, 0);
+      igl::AABB<Eigen::MatrixXd, 3>& tree0 = data_list[0].tree;
+      igl::AABB<Eigen::MatrixXd, 3>& tree1 = data_list[1].tree;
 
-	  return !recursionIsIntersection(tree0, tree1, model0, model1, Rot0, Rot1);
+      move_models = !recursionIsIntersection(&(data_list[0].tree), &(data_list[1].tree), model0, model1, Rot0, Rot1);
+	  return move_models;
   }
 
   bool Viewer::recursionIsIntersection(igl::AABB<Eigen::MatrixXd, 3>* tree0, igl::AABB<Eigen::MatrixXd, 3>* tree1,
                                        Eigen::Matrix4d& model0, Eigen::Matrix4d& model1,
                                        Eigen::Matrix3d& Rot0, Eigen::Matrix3d& Rot1) {
-
       if (isIntersectBox(tree0->m_box, tree1->m_box, model0, model1, Rot0, Rot1))
           return false;
       
       if (tree0->is_leaf() && tree1->is_leaf()) {
-          //data_list[0].drawBox(tree0->m_box, Eigen::RowVector3d::Random().normalized());
-          //data_list[1].drawBox(tree1->m_box, Eigen::RowVector3d::Random().normalized());
+          data_list[0].drawBox(tree0->m_box, Eigen::RowVector3d::Random().normalized());
+          data_list[1].drawBox(tree1->m_box, Eigen::RowVector3d::Random().normalized());
           return true;
       } else if (tree0->is_leaf()) {
-          return recursionIsIntersection(tree0, tree1->m_left, model0, model1, Rot0, Rot1) |
+          return recursionIsIntersection(tree0, tree1->m_left, model0, model1, Rot0, Rot1) ||
                  recursionIsIntersection(tree0, tree1->m_right, model0, model1, Rot0, Rot1);
       } else if (tree1->is_leaf()) {
-          return recursionIsIntersection(tree0->m_left, tree1, model0, model1, Rot0, Rot1) |
+          return recursionIsIntersection(tree0->m_left, tree1, model0, model1, Rot0, Rot1) ||
                  recursionIsIntersection(tree0->m_right, tree1, model0, model1, Rot0, Rot1);
       } else {
-          return recursionIsIntersection(tree0->m_left, tree1->m_left, model0, model1, Rot0, Rot1) |
-                 recursionIsIntersection(tree0->m_left, tree1->m_right, model0, model1, Rot0, Rot1) |
-                 recursionIsIntersection(tree0->m_right, tree1->m_left, model0, model1, Rot0, Rot1) |
+          return recursionIsIntersection(tree0->m_left, tree1->m_left, model0, model1, Rot0, Rot1) ||
+                 recursionIsIntersection(tree0->m_left, tree1->m_right, model0, model1, Rot0, Rot1) ||
+                 recursionIsIntersection(tree0->m_right, tree1->m_left, model0, model1, Rot0, Rot1) ||
                  recursionIsIntersection(tree0->m_right, tree1->m_right, model0, model1, Rot0, Rot1);
       }
   }

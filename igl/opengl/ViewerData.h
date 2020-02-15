@@ -124,7 +124,6 @@ public:
   /* CYLINDER */
   bool head_of_snake = false;
   int index_of_son;
-  int index;
 
   /* GENERAL */
   bool move_model = false;
