@@ -129,7 +129,7 @@ public:
   bool move_model = false;
   bool should_appear = true;
 
-  void UpdateCamera(Eigen::Vector3f& eye, Eigen::Vector3f& up, Eigen::Vector3f& translation);
+  void UpdateCamera(Eigen::Vector3f& eye, Eigen::Vector3f& up, Eigen::Vector3f& translation, Eigen::Matrix4f& world);
 
   //---------------------------------------------------------------------------------------//
   IGL_INLINE void set_visible(bool value, unsigned int core_id = 1);

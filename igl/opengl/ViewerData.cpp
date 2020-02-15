@@ -459,9 +459,10 @@ void igl::opengl::ViewerData::drawBoxes(igl::AABB<Eigen::MatrixXd, 3>* tree) {
 
 // --------------------------------------------------------------------------------------------
 // Project
-void igl::opengl::ViewerData::UpdateCamera(Eigen::Vector3f& eye, Eigen::Vector3f& up, Eigen::Vector3f& translation) {
+void igl::opengl::ViewerData::UpdateCamera(Eigen::Vector3f& eye, Eigen::Vector3f& up, Eigen::Vector3f& translation, Eigen::Matrix4f& product) {
     // This function assumed that it was called on cy
-    Eigen::Matrix4f product = Eigen::Matrix4f::Identity();
+    // eye/up/translation are the vectors from the core
+    // world/product is viewer.MakeTrans
     igl::opengl::ViewerData* current;
     if (son == nullptr)
         current = this;
@@ -470,7 +471,8 @@ void igl::opengl::ViewerData::UpdateCamera(Eigen::Vector3f& eye, Eigen::Vector3f
         while (current->son != nullptr)
             current = current->son;
     }
-    while (current->father != nullptr) {
+    //while (current->father != nullptr) {
+    while (current->father->head_of_snake == false) {
         product = product * current->MakeTrans();
         current = current->father;
     }

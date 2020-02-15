@@ -319,7 +319,7 @@ static void glfw_key_callback(GLFWwindow* window, int key, int scancode, int act
 			else {
 				scn->data().MyRotateX(-alpha);
 				if (strcmp(&(scn->data().model[0]), "sphere")) // if this is CY that moved, then updating camera
-					scn->data().UpdateCamera(rndr->core(first_person_camera_id).camera_eye, rndr->core(first_person_camera_id).camera_up, rndr->core(first_person_camera_id).camera_translation);
+					scn->data().UpdateCamera(rndr->core(first_person_camera_id).camera_eye, rndr->core(first_person_camera_id).camera_up, rndr->core(first_person_camera_id).camera_translation, scn->MakeTrans());
 			}
 			break;
 		case GLFW_KEY_DOWN:
@@ -328,7 +328,7 @@ static void glfw_key_callback(GLFWwindow* window, int key, int scancode, int act
 			else {
 				scn->data().MyRotateX(alpha);
 				if (strcmp(&(scn->data().model[0]), "sphere")) // if this is CY that moved, then updating camera
-					scn->data().UpdateCamera(rndr->core(first_person_camera_id).camera_eye, rndr->core(first_person_camera_id).camera_up, rndr->core(first_person_camera_id).camera_translation);
+					scn->data().UpdateCamera(rndr->core(first_person_camera_id).camera_eye, rndr->core(first_person_camera_id).camera_up, rndr->core(first_person_camera_id).camera_translation, scn->MakeTrans());
 			}
 			break;
 		case GLFW_KEY_LEFT:
@@ -337,7 +337,7 @@ static void glfw_key_callback(GLFWwindow* window, int key, int scancode, int act
 			else {
 				scn->data().MyRotateY(alpha);
 				if (strcmp(&(scn->data().model[0]), "sphere")) // if this is CY that moved, then updating camera
-					scn->data().UpdateCamera(rndr->core(first_person_camera_id).camera_eye, rndr->core(first_person_camera_id).camera_up, rndr->core(first_person_camera_id).camera_translation);
+					scn->data().UpdateCamera(rndr->core(first_person_camera_id).camera_eye, rndr->core(first_person_camera_id).camera_up, rndr->core(first_person_camera_id).camera_translation, scn->MakeTrans());
 			}
 			break;
 		case GLFW_KEY_RIGHT:
@@ -346,44 +346,62 @@ static void glfw_key_callback(GLFWwindow* window, int key, int scancode, int act
 			else {
 				scn->data().MyRotateY(-alpha);
 				if (strcmp(&(scn->data().model[0]), "sphere")) // if this is CY that moved, then updating camera
-					scn->data().UpdateCamera(rndr->core(first_person_camera_id).camera_eye, rndr->core(first_person_camera_id).camera_up, rndr->core(first_person_camera_id).camera_translation);
+					scn->data().UpdateCamera(rndr->core(first_person_camera_id).camera_eye, rndr->core(first_person_camera_id).camera_up, rndr->core(first_person_camera_id).camera_translation, scn->MakeTrans());
 			}
 			break;
 		case GLFW_KEY_KP_2:
 			if (scn->worldSelect)
 				scn->MyTranslate(Eigen::Vector3f(0, -dst, 0));
-			else
+			else {
 				scn->data().MyTranslate(Eigen::Vector3f(0, -dst, 0));
+				if (strcmp(&(scn->data().model[0]), "sphere")) // if this is CY that moved, then updating camera
+					scn->data().UpdateCamera(rndr->core(first_person_camera_id).camera_eye, rndr->core(first_person_camera_id).camera_up, rndr->core(first_person_camera_id).camera_translation, scn->MakeTrans());
+			}
 			break;
 		case GLFW_KEY_KP_4:
 			if (scn->worldSelect)
 				scn->MyTranslate(Eigen::Vector3f(-dst, 0, 0));
-			else
+			else {
 				scn->data().MyTranslate(Eigen::Vector3f(-dst, 0, 0));
+				if (strcmp(&(scn->data().model[0]), "sphere")) // if this is CY that moved, then updating camera
+					scn->data().UpdateCamera(rndr->core(first_person_camera_id).camera_eye, rndr->core(first_person_camera_id).camera_up, rndr->core(first_person_camera_id).camera_translation, scn->MakeTrans());
+			}
 			break;
 		case GLFW_KEY_KP_6:
 			if (scn->worldSelect)
 				scn->MyTranslate(Eigen::Vector3f(dst, 0, 0));
-			else
+			else {
 				scn->data().MyTranslate(Eigen::Vector3f(dst, 0, 0));
+				if (strcmp(&(scn->data().model[0]), "sphere")) // if this is CY that moved, then updating camera
+					scn->data().UpdateCamera(rndr->core(first_person_camera_id).camera_eye, rndr->core(first_person_camera_id).camera_up, rndr->core(first_person_camera_id).camera_translation, scn->MakeTrans());
+			}
 			break;
 		case GLFW_KEY_KP_7:
 			if (scn->worldSelect)
 				scn->MyTranslate(Eigen::Vector3f(0, 0, -dst));
-			else
+			else {
 				scn->data().MyTranslate(Eigen::Vector3f(0, 0, -dst));
+				if (strcmp(&(scn->data().model[0]), "sphere")) // if this is CY that moved, then updating camera
+					scn->data().UpdateCamera(rndr->core(first_person_camera_id).camera_eye, rndr->core(first_person_camera_id).camera_up, rndr->core(first_person_camera_id).camera_translation, scn->MakeTrans());
+			}
 			break;
 		case GLFW_KEY_KP_8:
 			if (scn->worldSelect)
 				scn->MyTranslate(Eigen::Vector3f(0, dst, 0));
-			else
+			else {
 				scn->data().MyTranslate(Eigen::Vector3f(0, dst, 0));
+				if (strcmp(&(scn->data().model[0]), "sphere")) // if this is CY that moved, then updating camera
+					scn->data().UpdateCamera(rndr->core(first_person_camera_id).camera_eye, rndr->core(first_person_camera_id).camera_up, rndr->core(first_person_camera_id).camera_translation, scn->MakeTrans());
+			}
 			break;
 		case GLFW_KEY_KP_9:
 			if (scn->worldSelect)
 				scn->MyTranslate(Eigen::Vector3f(0, 0, dst));
-			else
+			else {
 				scn->data().MyTranslate(Eigen::Vector3f(0, 0, dst));
+				if (strcmp(&(scn->data().model[0]), "sphere")) // if this is CY that moved, then updating camera
+					scn->data().UpdateCamera(rndr->core(first_person_camera_id).camera_eye, rndr->core(first_person_camera_id).camera_up, rndr->core(first_person_camera_id).camera_translation, scn->MakeTrans());
+			}
 			break;
 		default: break;//do nothing
 		}
