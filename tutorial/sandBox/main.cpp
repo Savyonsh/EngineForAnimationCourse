@@ -137,7 +137,7 @@ void adjustModels(igl::opengl::glfw::Viewer* viewer, int times) {
 
 		if (!(strcmp(&curr->model[0], "sphere"))) {
 			viewer->spheres.push_back(curr);
-			curr->MyTranslate(Eigen::Vector3f(0, 5*counterSh++, 0));
+			curr->MyTranslate(Eigen::Vector3f(10, 5*counterSh++, 0));
 			curr->direction = Eigen::Vector3f(0, -1, 0);
 			curr->velocity = 0.1f;
 			curr->show_lines = false;
@@ -221,7 +221,7 @@ void adjustModels(igl::opengl::glfw::Viewer* viewer, int times) {
 
 	}
 	// Adjusting the "camera"
-	//viewer->MyTranslate(Eigen::Vector3f(-8, -10, -30));
+	viewer->MyTranslate(Eigen::Vector3f(-8, -10, -30));
 	//viewer->MyTranslate(Eigen::Vector3f(-1, -2, -7));
 }
 
@@ -292,18 +292,13 @@ int main(int argc, char* argv[])
 
 	// Assignment 3 //
 
-	int cyNum = 0, shNum = 3;
-	//if (!(read_Meshes(&viewer, "configuration.txt", cyNum, shNum))) return 1;
-	viewer.load_mesh_from_file("C:/Users/Sharon/source/repos/Project/tutorial/data/bunny.off");
-	viewer.load_mesh_from_file("C:/Users/Sharon/source/repos/Project/tutorial/data/cube.obj");
-	viewer.load_mesh_from_file("C:/Users/Sharon/source/repos/Project/tutorial/data/sphere.obj");
-	
-	//adjustModels(&viewer, cyNum);
-	//add_texture_to_list_of_datas(viewer, "SnakeSkin.png", std::vector<int>{0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15}, true, 5);
-	
+	int cyNum = 10, shNum = 5;
+	if (!(read_Meshes(&viewer, "configuration.txt", cyNum, shNum))) return 1;	
+	adjustModels(&viewer, cyNum);
+	//add_texture_to_list_of_datas(viewer, "SnakeSkin.png", std::vector<int>
+		//{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}, true, 5);	
 	Init(*disp);
-	renderer.init(&viewer,800, 1000);
-	
+	renderer.init(&viewer,800, 1000);	
 	disp->SetRenderer(&renderer);
 	disp->launch_rendering(true);
 	delete disp;
