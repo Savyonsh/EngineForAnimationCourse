@@ -138,12 +138,15 @@ bool Display::launch_rendering(bool loop)
 	// Assignment 3 
 	igl::opengl::ViewerData* last = nullptr;
 	igl::opengl::ViewerData* first = nullptr;
+	igl::opengl::ViewerData* curr = nullptr;
+	Matrix4d trans;
+	Matrix4d crap;
 	Vector3f destPoint;
 	int index_top = 0;
 	// Finding the first and last cylinder, finding shprere
 	for (unsigned int i = 0; i < scn->data_list.size(); i++) {
 		if (strcmp(&scn->data_list[i].model[0], "sphere") && !scn->data_list[i].father) {
-			last = scn->data_list[i].son;
+			last = &scn->data_list[i];
 			//saving the index of the last cylinder - the top
 			index_top = i;
 		}
@@ -186,24 +189,30 @@ bool Display::launch_rendering(bool loop)
 				pow(destPoint(2) - bottom(2), 2));			
 			if (distance <= scn->lengthOfArm)
 			{
+				//last->drawBoxes(&last->tree);
 				CalculateIK(scn, last, destPoint);
-				//// check if there is an intersection between the top and the selected sphere
-				//if (scn->isIntersection(index_top, scn->selected_data_index)) {
-				//	scn->isIk = false;
-				//	//scn->data().should_appear = false;
-				//	scn->data().move_model = false;
-				//}
-
-				float delta;
-				Eigen::Vector3f top = last->getTopInWorld(scn->MakeTrans());
-				delta = sqrt(pow(destPoint(0) - top(0), 2) +
-					pow(destPoint(1) - top(1), 2) +
-					pow(destPoint(2) - top(2), 2));				
-				if (delta <= 0.1 && delta > 0) {
+				// check if there is an intersection between the top and the selected sphere	
+				curr = first;
+				trans = Matrix4d::Identity();
+				while (curr) {
+					trans = trans * curr->MakeTransD();
+					curr = curr->father;
+				}
+				if (scn->isIntersection(trans, scn->data().MakeTransD(), index_top, scn->selected_data_index)) {
 					scn->isIk = false;
-					scn->data().should_appear = false;
+					//scn->data().should_appear = false;
 					scn->data().move_model = false;
 				}
+				//float delta;
+				//Eigen::Vector3f top = last->getTopInWorld(scn->MakeTrans());
+				//delta = sqrt(pow(destPoint(0) - top(0), 2) +
+				//	pow(destPoint(1) - top(1), 2) +
+				//	pow(destPoint(2) - top(2), 2));				
+				//if (delta <= 0.1 && delta > 0) {
+				//	scn->isIk = false;
+				//	scn->data().should_appear = false;
+				//	scn->data().move_model = false;
+				//}
 			}
 			else {
 				cout << "Distance too far." << endl;
