@@ -318,7 +318,7 @@ static void glfw_key_callback(GLFWwindow* window, int key, int scancode, int act
 				scn->MyRotateX(-alpha);
 			else {
 				scn->data().MyRotateX(-alpha);
-				if (strcmp(&curr->model[0], "sphere")) // if this is CY that moved, then updating camera
+				if (strcmp(&(scn->data().model[0]), "sphere")) // if this is CY that moved, then updating camera
 					scn->data().UpdateCamera(rndr->core(first_person_camera_id).camera_eye, rndr->core(first_person_camera_id).camera_up, rndr->core(first_person_camera_id).camera_translation);
 			}
 			break;
@@ -327,7 +327,7 @@ static void glfw_key_callback(GLFWwindow* window, int key, int scancode, int act
 				scn->MyRotateX(alpha);
 			else {
 				scn->data().MyRotateX(alpha);
-				if (strcmp(&curr->model[0], "sphere")) // if this is CY that moved, then updating camera
+				if (strcmp(&(scn->data().model[0]), "sphere")) // if this is CY that moved, then updating camera
 					scn->data().UpdateCamera(rndr->core(first_person_camera_id).camera_eye, rndr->core(first_person_camera_id).camera_up, rndr->core(first_person_camera_id).camera_translation);
 			}
 			break;
@@ -336,7 +336,7 @@ static void glfw_key_callback(GLFWwindow* window, int key, int scancode, int act
 				scn->MyRotateY(alpha);
 			else {
 				scn->data().MyRotateY(alpha);
-				if (strcmp(&curr->model[0], "sphere")) // if this is CY that moved, then updating camera
+				if (strcmp(&(scn->data().model[0]), "sphere")) // if this is CY that moved, then updating camera
 					scn->data().UpdateCamera(rndr->core(first_person_camera_id).camera_eye, rndr->core(first_person_camera_id).camera_up, rndr->core(first_person_camera_id).camera_translation);
 			}
 			break;
@@ -345,7 +345,7 @@ static void glfw_key_callback(GLFWwindow* window, int key, int scancode, int act
 				scn->MyRotateY(-alpha);
 			else {
 				scn->data().MyRotateY(-alpha);
-				if (strcmp(&curr->model[0], "sphere")) // if this is CY that moved, then updating camera
+				if (strcmp(&(scn->data().model[0]), "sphere")) // if this is CY that moved, then updating camera
 					scn->data().UpdateCamera(rndr->core(first_person_camera_id).camera_eye, rndr->core(first_person_camera_id).camera_up, rndr->core(first_person_camera_id).camera_translation);
 			}
 			break;
