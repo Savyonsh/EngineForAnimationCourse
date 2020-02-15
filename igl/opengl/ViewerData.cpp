@@ -397,7 +397,7 @@ Eigen::Vector3f igl::opengl::ViewerData::getBottomInWorld(Eigen::Matrix4f& world
 // --------------------------------------------------------------------------------------------
 // Assignment 4
 
-void::igl::opengl::ViewerData::drawBox(AlignedBox<double, 3> m_box, RowVector3d color) {
+void igl::opengl::ViewerData::drawBox(AlignedBox<double, 3> m_box, RowVector3d color) {
 	MatrixXd boxPoints(8, 3);
 	Eigen::MatrixXi boxLines(12, 2);
 
@@ -441,7 +441,7 @@ void::igl::opengl::ViewerData::drawBox(AlignedBox<double, 3> m_box, RowVector3d 
 		);
 }
 
-void::igl::opengl::ViewerData::drawBoxes(igl::AABB<Eigen::MatrixXd, 3>* tree) {
+void igl::opengl::ViewerData::drawBoxes(igl::AABB<Eigen::MatrixXd, 3>* tree) {
 	if (!tree) return;
 	Vector3d top_edge(tree->m_box.corner(tree->m_box.TopRightCeil)
 							  - tree->m_box.corner(tree->m_box.TopLeftCeil));
@@ -455,6 +455,33 @@ void::igl::opengl::ViewerData::drawBoxes(igl::AABB<Eigen::MatrixXd, 3>* tree) {
 		drawBox(tree->m_right->m_box, Eigen::RowVector3d::Random().normalized());
 	//drawBoxes(tree->m_left);
 	drawBoxes(tree->m_right);
+}
+
+// --------------------------------------------------------------------------------------------
+// Project
+void igl::opengl::ViewerData::UpdateCamera(Eigen::Vector3f& eye, Eigen::Vector3f& up, Eigen::Vector3f& translation) {
+    // This function assumed that it was called on cy
+    Eigen::Matrix4f product = Eigen::Matrix4f::Identity();
+    igl::opengl::ViewerData* current;
+    if (son == nullptr)
+        current = this;
+    else {
+        current = son;
+        while (current->son != nullptr)
+            current = current->son;
+    }
+    while (current->father != nullptr) {
+        product = product * current->MakeTrans();
+        current = current->father;
+    }
+    product = product * current->MakeTrans();
+    Eigen::Matrix3f rot = product.block<3, 3>(0, 0);
+
+
+    // The following 3 vectors are the "default" location of our choosing, if we change the default in Renderer::init, then we need to change it here too.
+    eye = rot * Eigen::Vector3f(0, -3, 0);
+    up = rot * Eigen::Vector3f(0, 0, 1);
+    translation = - (product * Eigen::Vector4f(0, -1, 1, 1)).block<3, 1>(0, 0);
 }
 
 // --------------------------------------------------------------------------------------------

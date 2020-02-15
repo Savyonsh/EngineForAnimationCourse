@@ -137,6 +137,7 @@ static void glfw_key_callback(GLFWwindow* window, int key, int scancode, int act
 	Renderer* rndr = (Renderer*)glfwGetWindowUserPointer(window);
 	igl::opengl::glfw::Viewer* scn = rndr->GetScene();
 	float alpha = 15 / 180.0f, dst = 0.25;
+	int first_person_camera_id = 2;
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, GL_TRUE);
 
@@ -315,26 +316,38 @@ static void glfw_key_callback(GLFWwindow* window, int key, int scancode, int act
 		case GLFW_KEY_UP:
 			if (scn->worldSelect)
 				scn->MyRotateX(-alpha);
-			else
+			else {
 				scn->data().MyRotateX(-alpha);
+				if (strcmp(&(scn->data().model[0]), "sphere")) // if this is CY that moved, then updating camera
+					scn->data().UpdateCamera(rndr->core(first_person_camera_id).camera_eye, rndr->core(first_person_camera_id).camera_up, rndr->core(first_person_camera_id).camera_translation);
+			}
 			break;
 		case GLFW_KEY_DOWN:
 			if (scn->worldSelect)
 				scn->MyRotateX(alpha);
-			else
-			scn->data().MyRotateX(alpha);
+			else {
+				scn->data().MyRotateX(alpha);
+				if (strcmp(&(scn->data().model[0]), "sphere")) // if this is CY that moved, then updating camera
+					scn->data().UpdateCamera(rndr->core(first_person_camera_id).camera_eye, rndr->core(first_person_camera_id).camera_up, rndr->core(first_person_camera_id).camera_translation);
+			}
 			break;
 		case GLFW_KEY_LEFT:
 			if (scn->worldSelect)
 				scn->MyRotateY(alpha);
-			else
-			scn->data().MyRotateY(alpha);
+			else {
+				scn->data().MyRotateY(alpha);
+				if (strcmp(&(scn->data().model[0]), "sphere")) // if this is CY that moved, then updating camera
+					scn->data().UpdateCamera(rndr->core(first_person_camera_id).camera_eye, rndr->core(first_person_camera_id).camera_up, rndr->core(first_person_camera_id).camera_translation);
+			}
 			break;
 		case GLFW_KEY_RIGHT:
 			if (scn->worldSelect)
 				scn->MyRotateY(-alpha);
-			else
-			scn->data().MyRotateY(-alpha);
+			else {
+				scn->data().MyRotateY(-alpha);
+				if (strcmp(&(scn->data().model[0]), "sphere")) // if this is CY that moved, then updating camera
+					scn->data().UpdateCamera(rndr->core(first_person_camera_id).camera_eye, rndr->core(first_person_camera_id).camera_up, rndr->core(first_person_camera_id).camera_translation);
+			}
 			break;
 		case GLFW_KEY_KP_2:
 			if (scn->worldSelect)
