@@ -291,28 +291,30 @@ static void glfw_key_callback(GLFWwindow* window, int key, int scancode, int act
 		case 'K':
 		case 'k':
 			scn->data().drawBoxes(&(scn->data().tree));
+			std::cout << "this object id is : " << scn->selected_data_index << std::endl;
 			break;
 		case 'T':
 		case 't':
 		{
-			// scn->isIntersection();
-			scn->data().add_points(scn->data().tree.m_box.center().transpose(), Eigen::RowVector3d::Random());
-
-			// Eigen::Vector4d temp1;
-			// temp1 << scn->data().tree.m_box.center(), 1;
-			// scn->data().add_points((scn->data().MakeTransD() * temp1).block<3, 1>(0, 0).transpose(), Eigen::RowVector3d::Random());
-
+			for (int i = 0; i < scn->data_list.size(); i++) {
+				if (strcmp(&(scn->data_list[i].model[0]), "sphere"))
+					std::cout << i << std::endl << scn->data_list[i].MakeTrans() << std::endl << std::endl;
+			}
 			break;
 		}
 		case 'R':
 		case 'r':
-			for (int i = 0; i < scn->data_list.size(); i++) {
-				scn->data_list[i].ResetMovable();
-				scn->data_list[i].MyRotateX(2.5);
-				scn->data_list[i].MyRotateY(0.35);
-				scn->data_list[i].Translate(Vector3f(i == 0 ? 1.5 : -1.5, 0, 0));
-			}
+		{
+			igl::AABB<Eigen::MatrixXd, 3>* tree0 = &(scn->data().tree);
+			igl::AABB<Eigen::MatrixXd, 3>* tree1 = &(scn->data_list[2].tree);
+			Eigen::Matrix4d& model0 = scn->data().MakeTransD();
+			Eigen::Matrix4d model1 = scn->data_list[0].MakeTransD() * scn->data_list[1].MakeTransD() * scn->data_list[2].MakeTransD();
+			Eigen::Matrix3d Rot0 = model0.block<3, 3>(0, 0);
+			Eigen::Matrix3d Rot1 = model1.block<3, 3>(0, 0);
+			bool result = scn->recursionIsIntersection(tree0, tree1, model0, model1, Rot0, Rot1);
+			std::cout << (result ? "Hitting each other" : "Doesn't hit each other") << std::endl;
 			break;
+		}
 		case GLFW_KEY_UP:
 			if (scn->worldSelect)
 				scn->MyRotateX(-alpha);

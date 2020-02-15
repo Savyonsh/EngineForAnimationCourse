@@ -137,7 +137,7 @@ void adjustModels(igl::opengl::glfw::Viewer* viewer, int times) {
 
 		if (!(strcmp(&curr->model[0], "sphere"))) {
 			viewer->spheres.push_back(curr);
-			curr->MyTranslate(Eigen::Vector3f(10, 5*counterSh++, 0));
+			curr->MyTranslate(Eigen::Vector3f(4*counterSh, 5*counterSh++, 0));
 			curr->direction = Eigen::Vector3f(0, -1, 0);
 			curr->velocity = 0.1f;
 			curr->show_lines = false;
@@ -174,7 +174,6 @@ void adjustModels(igl::opengl::glfw::Viewer* viewer, int times) {
 				widOfCy = M(0) - m(0);
 				girthOfCy = M(2) - m(2);
 				viewer->lengthOfArm = lenOfCy * times;
-				cout << viewer->lengthOfArm << endl;
 				first = false;
 			}
 

@@ -461,16 +461,16 @@ namespace glfw
   IGL_INLINE void Viewer::Animate(Eigen::Vector3f root, Eigen::Vector3f endpoint, ViewerData* cy, Eigen::Vector3f destPoint) {
 	  Eigen::Vector3f RD(destPoint - root);
 	  Eigen::Vector3f RE(endpoint - root);
-	  float angle = acos(RE.normalized().dot(RD.normalized()));
-	 angle = angle / 10;
-	  //Eigen::Matrix3f rot = Eigen::AngleAxisf(angle, (RE.cross(RD)).normalized()).matrix();
-	  //float angleY0 = atan2(rot(0, 1), rot(2, 1));
-	  //float angleX = acos(rot(1, 1));
-	  //float angleY1 = atan2(rot(1, 0), -rot(1, 2));
+	  float angle = acos( RE.normalized().dot(RD.normalized()) );
+	  angle = angle / 10;
+	  /*Eigen::Matrix3f rot = Eigen::AngleAxisf(angle, (RE.cross(RD)).normalized()).matrix();
+	  float angleY0 = atan2(rot(0, 1), rot(2, 1));
+	  float angleX = acos(rot(1, 1));
+	  float angleY1 = atan2(rot(1, 0), -rot(1, 2));
 
-	  //cy->MyRotateY(angleY0);
-	  //cy->MyRotateX(angleX);
-	  //cy->MyRotateY(angleY1);
+	  cy->MyRotateY(angleY0);
+	  cy->MyRotateX(angleX);
+	  cy->MyRotateY(angleY1);*/
 
 	  cy->MyRotate((RE.cross(RD)).normalized(), angle);
   }
