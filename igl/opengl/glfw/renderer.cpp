@@ -115,8 +115,8 @@ IGL_INLINE void Renderer::init(igl::opengl::glfw::Viewer* viewer, int height, in
 	core().align_camera_center(scn->data().V, scn->data().F);
 	//--------Shaked-------//
 	// core() is like data(), meaning there is core_list in there, but in this case it's private so we have to use the "fake" id of each core if we want to change between them.
-	core().viewport = Eigen::Vector4f(0, 0, width, height); // set the first camera to be normal (the whole screen).
-	append_core(Eigen::Vector4f(0, 0, width / 2, height / 2)); // second camera will be at the button left of the screen, at the size of 1/4 of the screen.
+	core().viewport = Eigen::Vector4f(width / 2, 0, width / 2, height); // set the first camera to be normal (the whole screen).
+	append_core(Eigen::Vector4f(0, 0, width / 2, height)); // second camera will be at the button left of the screen, at the size of 1/4 of the screen.
 	selected_core_index = 0; // append_core change the selected camera to the new one, I changed it back to the main screen so Picking() and other function will work according to the main one.
 
 	for (int i = 0; i < viewer->data_list.size(); i++) {
@@ -138,7 +138,7 @@ IGL_INLINE void Renderer::init(igl::opengl::glfw::Viewer* viewer, int height, in
 		std::cout << "Error no cylinder found, error at Renderer::init(...)" << std::endl;
 		exit(1);
 	}
-	viewer->data_list[i].UpdateCamera(core_list[1].camera_eye, core_list[1].camera_up, core_list[1].camera_translation);
+	viewer->data_list[i].UpdateCamera(core_list[1].camera_eye, core_list[1].camera_up, core_list[1].camera_translation, viewer->MakeTrans());
 	
 	//core_list[1].camera_center = (viewer->data_list[2].MakeTrans() * Eigen::Vector4f(0, 0, 0, 1)).block<3, 1>(0, 0);
 
@@ -324,8 +324,8 @@ IGL_INLINE void Renderer::resize(GLFWwindow* window,int w, int h)
 
 			//--------Shaked-------//
 			// When resizing the window it will keep the camera the same way.
-			core_list[0].viewport = Eigen::Vector4f(0, 0, w, h);
-			core_list[1].viewport = Eigen::Vector4f(0, 0, w / 2, h / 2);
+			core_list[0].viewport = Eigen::Vector4f(w / 2, 0, w / 2, h);
+			core_list[1].viewport = Eigen::Vector4f(0, 0, w / 2, h);
 			//---------------------//
 		}
 		//for (unsigned int i = 0; i < plugins.size(); ++i)

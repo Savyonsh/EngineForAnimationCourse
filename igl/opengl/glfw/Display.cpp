@@ -138,15 +138,12 @@ bool Display::launch_rendering(bool loop)
 	// Assignment 3 
 	igl::opengl::ViewerData* last = nullptr;
 	igl::opengl::ViewerData* first = nullptr;
-	igl::opengl::ViewerData* curr = nullptr;
-	Matrix4d trans;
-	Matrix4d crap;
 	Vector3f destPoint;
 	int index_top = 0;
 	// Finding the first and last cylinder, finding shprere
 	for (unsigned int i = 0; i < scn->data_list.size(); i++) {
 		if (strcmp(&scn->data_list[i].model[0], "sphere") && !scn->data_list[i].father) {
-			last = &scn->data_list[i];
+			last = scn->data_list[i].son;
 			//saving the index of the last cylinder - the top
 			index_top = i;
 		}
@@ -189,30 +186,39 @@ bool Display::launch_rendering(bool loop)
 				pow(destPoint(2) - bottom(2), 2));			
 			if (distance <= scn->lengthOfArm)
 			{
-				//last->drawBoxes(&last->tree);
 				CalculateIK(scn, last, destPoint);
-				// check if there is an intersection between the top and the selected sphere	
-				curr = first;
-				trans = Matrix4d::Identity();
-				while (curr) {
-					trans = trans * curr->MakeTransD();
-					curr = curr->father;
-				}
-				if (scn->isIntersection(trans, scn->data().MakeTransD(), index_top, scn->selected_data_index)) {
-					scn->isIk = false;
-					//scn->data().should_appear = false;
-					scn->data().move_model = false;
-				}
-				//float delta;
-				//Eigen::Vector3f top = last->getTopInWorld(scn->MakeTrans());
-				//delta = sqrt(pow(destPoint(0) - top(0), 2) +
-				//	pow(destPoint(1) - top(1), 2) +
-				//	pow(destPoint(2) - top(2), 2));				
-				//if (delta <= 0.1 && delta > 0) {
+				//// check if there is an intersection between the top and the selected sphere
+				//if (scn->isIntersection(index_top, scn->selected_data_index)) {
 				//	scn->isIk = false;
-				//	scn->data().should_appear = false;
+				//	//scn->data().should_appear = false;
 				//	scn->data().move_model = false;
 				//}
+
+				/*float delta;
+				Eigen::Vector3f top = last->getTopInWorld(scn->MakeTrans());
+				delta = sqrt(pow(destPoint(0) - top(0), 2) +
+					pow(destPoint(1) - top(1), 2) +
+					pow(destPoint(2) - top(2), 2));				
+				if (delta <= 0.1 && delta > 0) {
+					scn->isIk = false;
+					scn->data().should_appear = false;
+					scn->data().move_model = false;
+				}*/
+				igl::AABB<Eigen::MatrixXd, 3>* tree0 = &(scn->data().tree);
+				igl::AABB<Eigen::MatrixXd, 3>* tree1 = &(scn->data_list[10].tree);
+				Eigen::Matrix4d& model0 = scn->data().MakeTransD();
+				Eigen::Matrix4d model1 = scn->data_list[0].MakeTransD();
+				for (int i = 1; i <= 10; i++) {
+					model1 = model1 * scn->data_list[i].MakeTransD();
+				}
+				Eigen::Matrix3d Rot0 = model0.block<3, 3>(0, 0);
+				Eigen::Matrix3d Rot1 = model1.block<3, 3>(0, 0);
+				bool result = scn->recursionIsIntersection(tree0, tree1, model0, model1, Rot0, Rot1);
+				if (result) {
+					scn->isIk = false;
+					scn->data().should_appear = false;
+					scn->data().move_model = false;
+				}
 			}
 			else {
 				cout << "Distance too far." << endl;
