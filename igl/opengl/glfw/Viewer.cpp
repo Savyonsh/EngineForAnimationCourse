@@ -463,7 +463,8 @@ namespace glfw
 	  Eigen::Vector3f RE(endpoint - root);
 	  float angle = acos( RE.normalized().dot(RD.normalized()) );
 	  angle = angle / 10;
-	  /*Eigen::Matrix3f rot = Eigen::AngleAxisf(angle, (RE.cross(RD)).normalized()).matrix();
+	  
+      /*Eigen::Matrix3f rot = Eigen::AngleAxisf(angle, (RE.cross(RD)).normalized()).matrix();
 	  float angleY0 = atan2(rot(0, 1), rot(2, 1));
 	  float angleX = acos(rot(1, 1));
 	  float angleY1 = atan2(rot(1, 0), -rot(1, 2));

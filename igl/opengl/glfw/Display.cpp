@@ -1,5 +1,3 @@
-
-
 #include <chrono>
 #include <thread>
 
@@ -8,7 +6,6 @@
 
 #include "igl/igl_inline.h"
 #include <igl/get_seconds.h>
-
 
 static void glfw_error_callback(int error, const char* description)
 {
@@ -157,6 +154,7 @@ bool Display::launch_rendering(bool loop)
 	igl::AABB<Eigen::MatrixXd, 3> *tree0, *tree1 = &(scn->data_list[index_top].tree);
 	Eigen::Matrix4d model0, model1;
 	Eigen::Matrix3d Rot0, Rot1;
+	igl::opengl::ViewerCore* core = &(((Renderer*)glfwGetWindowUserPointer(this->window))->core(2));
 	while (!glfwWindowShouldClose(window))
 	{
 		// Falling animation for spheres 
@@ -192,6 +190,7 @@ bool Display::launch_rendering(bool loop)
 			if (distance <= scn->lengthOfArm)
 			{
 				CalculateIK(scn, last, destPoint);
+				first->UpdateCamera(core->camera_eye, core->camera_up, core->camera_translation, scn->MakeTrans());
 				//// check if there is an intersection between the top and the selected sphere
 				//if (scn->isIntersection(index_top, scn->selected_data_index)) {
 				//	scn->isIk = false;
