@@ -5,6 +5,9 @@
 #include <igl/opengl/ViewerCore.h>
 #include <igl/opengl/glfw/Viewer.h>
 
+#include <chrono>
+#include <ctime> // For the game - get current time
+
 struct GLFWwindow;
 
 class Renderer 
@@ -97,6 +100,16 @@ public:
 			(selected_core_index + core_list.size() + (unicode_key == ']' ? 1 : -1)) % core_list.size();
 
 	}
+
+	// Game stuff //
+	int score, round, flag_next_round;
+	#define UNANSWERED_NEXT_ROUND	2
+	#define YES_NEXT_ROUND			1
+	#define NO_NEXT_ROUND			0
+	const long long round_length; // seconds
+	std::chrono::system_clock::time_point round_start_time;
+	bool isGamePaused;
+	const float score_multi = 0.5;
 
 private:
 	// Stores all the viewing options

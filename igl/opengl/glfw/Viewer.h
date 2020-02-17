@@ -158,6 +158,7 @@ public:
 	ViewerData* firstCy = nullptr;
 	ViewerData* lastCy = nullptr;
     
+    const std::string usage;
 
     // List of registered plugins
 //    std::vector<ViewerPlugin*> plugins;

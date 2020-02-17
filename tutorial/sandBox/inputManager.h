@@ -179,6 +179,8 @@ static void glfw_key_callback(GLFWwindow* window, int key, int scancode, int act
 		}
 		case ' ':
 		{
+			if (rndr->isGamePaused)
+				break;
 			scn->isIk = !(scn->isIk);
 			for (auto i = 0; i < scn->data_list.size(); i++) {
 				if (!strcmp(&scn->data_list[i].model[0], "sphere")) {
@@ -316,37 +318,93 @@ static void glfw_key_callback(GLFWwindow* window, int key, int scancode, int act
 			//break;
 			scn->data().Translate(Vector3f(5, 4, 0));
 		}
+		case 'H':
+		case 'h':
+		{
+			std::cout << scn->usage << std::endl;
+			break;
+		}
+		case 'Y':
+		case 'y':
+		{
+			rndr->flag_next_round = YES_NEXT_ROUND;
+			break;
+		}
+		case 'N':
+		case 'n':
+		{
+			rndr->flag_next_round = NO_NEXT_ROUND;
+			break;
+		}
+		case 'S':
+		case 's':
+		{
+			std::cout << "Your current score: " << rndr->score << std::endl;
+			break;
+		}
 		case GLFW_KEY_UP:
-			if (scn->worldSelect)
+			if (scn->worldSelect) {
 				scn->MyRotateX(-alpha);
-			else {
+				int someCyIndex = 0;
+				for (; someCyIndex < scn->data_list.size(); someCyIndex++) {
+					if (strcmp(&(scn->data_list[someCyIndex].model[0]), "sphere"))
+						break;
+				}
+				if (someCyIndex == scn->data_list.size())
+					break;
+				scn->data(someCyIndex).UpdateCamera(rndr->core(first_person_camera_id).camera_eye, rndr->core(first_person_camera_id).camera_up, rndr->core(first_person_camera_id).camera_translation, scn->MakeTrans());
+			} else {
 				scn->data().MyRotateX(-alpha);
 				if (strcmp(&(scn->data().model[0]), "sphere")) // if this is CY that moved, then updating camera
 					scn->data().UpdateCamera(rndr->core(first_person_camera_id).camera_eye, rndr->core(first_person_camera_id).camera_up, rndr->core(first_person_camera_id).camera_translation, scn->MakeTrans());
 			}
 			break;
 		case GLFW_KEY_DOWN:
-			if (scn->worldSelect)
+			if (scn->worldSelect) {
 				scn->MyRotateX(alpha);
-			else {
+				int someCyIndex = 0;
+				for (; someCyIndex < scn->data_list.size(); someCyIndex++) {
+					if (strcmp(&(scn->data_list[someCyIndex].model[0]), "sphere"))
+						break;
+				}
+				if (someCyIndex == scn->data_list.size())
+					break;
+				scn->data(someCyIndex).UpdateCamera(rndr->core(first_person_camera_id).camera_eye, rndr->core(first_person_camera_id).camera_up, rndr->core(first_person_camera_id).camera_translation, scn->MakeTrans());
+			} else {
 				scn->data().MyRotateX(alpha);
 				if (strcmp(&(scn->data().model[0]), "sphere")) // if this is CY that moved, then updating camera
 					scn->data().UpdateCamera(rndr->core(first_person_camera_id).camera_eye, rndr->core(first_person_camera_id).camera_up, rndr->core(first_person_camera_id).camera_translation, scn->MakeTrans());
 			}
 			break;
 		case GLFW_KEY_LEFT:
-			if (scn->worldSelect)
+			if (scn->worldSelect) {
 				scn->MyRotateY(alpha);
-			else {
+				int someCyIndex = 0;
+				for (; someCyIndex < scn->data_list.size(); someCyIndex++) {
+					if (strcmp(&(scn->data_list[someCyIndex].model[0]), "sphere"))
+						break;
+				}
+				if (someCyIndex == scn->data_list.size())
+					break;
+				scn->data(someCyIndex).UpdateCamera(rndr->core(first_person_camera_id).camera_eye, rndr->core(first_person_camera_id).camera_up, rndr->core(first_person_camera_id).camera_translation, scn->MakeTrans());
+			} else {
 				scn->data().MyRotateY(alpha);
 				if (strcmp(&(scn->data().model[0]), "sphere")) // if this is CY that moved, then updating camera
 					scn->data().UpdateCamera(rndr->core(first_person_camera_id).camera_eye, rndr->core(first_person_camera_id).camera_up, rndr->core(first_person_camera_id).camera_translation, scn->MakeTrans());
 			}
 			break;
 		case GLFW_KEY_RIGHT:
-			if (scn->worldSelect)
+			if (scn->worldSelect) {
 				scn->MyRotateY(-alpha);
-			else {
+				int someCyIndex = 0;
+				for (; someCyIndex < scn->data_list.size(); someCyIndex++) {
+					if (strcmp(&(scn->data_list[someCyIndex].model[0]), "sphere"))
+						break;
+				}
+				if (someCyIndex == scn->data_list.size())
+					break;
+				scn->data(someCyIndex).UpdateCamera(rndr->core(first_person_camera_id).camera_eye, rndr->core(first_person_camera_id).camera_up, rndr->core(first_person_camera_id).camera_translation, scn->MakeTrans());
+			} else {
 				scn->data().MyRotateY(-alpha);
 				if (strcmp(&(scn->data().model[0]), "sphere")) // if this is CY that moved, then updating camera
 					scn->data().UpdateCamera(rndr->core(first_person_camera_id).camera_eye, rndr->core(first_person_camera_id).camera_up, rndr->core(first_person_camera_id).camera_translation, scn->MakeTrans());
