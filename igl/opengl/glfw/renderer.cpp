@@ -8,7 +8,7 @@
 using namespace Eigen; 
 
 Renderer::Renderer() : selected_core_index(0),
-next_core_id(2)
+next_core_id(2), score(0), round(0), round_length(15), flag_next_round(UNANSWERED_NEXT_ROUND), isGamePaused(false)
 {
 	core_list.emplace_back(igl::opengl::ViewerCore());
 	core_list.front().id = 1;

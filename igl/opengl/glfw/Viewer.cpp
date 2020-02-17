@@ -102,7 +102,30 @@ namespace glfw
   IGL_INLINE Viewer::Viewer():
     data_list(1),
     selected_data_index(0),
-    next_data_id(1)
+    next_data_id(1),
+      usage(R"(igl::opengl::glfw::Viewer usage:
+  [drag]          Rotate scene
+  A,a             Toggle animation (tight draw loop)
+  F,f             Toggle face based
+  I,i             Toggle invert normals
+  L,l             Toggle wireframe
+  O,o             Toggle orthographic/perspective projection
+  T,t             Toggle filled faces
+  [,]             Toggle between cameras
+  1,2             Toggle between models
+  ;               Toggle vertex labels
+  :               Toggle face labels
+  3               Select world model
+  Arrows          Rotate selected model
+  Numpad 2,4,6,8  move up and down the model (X,Y axis)
+  Numpad 7,9      move the model closer/further (Z axis)
+  M,m             Mute sounds
+  Numpad +,-      Volume up and down
+  Y,y             Answer Yes
+  N,n             Answer No
+  Space           Toggle IK
+  H,h             Reprint this menu for help)"
+      )
   {
     data_list.front().id = 0;
 
@@ -115,24 +138,6 @@ namespace glfw
 
     // Per face
     data().set_face_based(false);
-
-    
-#ifndef IGL_VIEWER_VIEWER_QUIET
-    const std::string usage(R"(igl::opengl::glfw::Viewer usage:
-  [drag]  Rotate scene
-  A,a     Toggle animation (tight draw loop)
-  F,f     Toggle face based
-  I,i     Toggle invert normals
-  L,l     Toggle wireframe
-  O,o     Toggle orthographic/perspective projection
-  T,t     Toggle filled faces
-  [,]     Toggle between cameras
-  1,2     Toggle between models
-  ;       Toggle vertex labels
-  :       Toggle face labels)"
-);
-    std::cout<<usage<<std::endl;
-#endif
   }
 
   IGL_INLINE Viewer::~Viewer()
@@ -461,8 +466,8 @@ namespace glfw
   IGL_INLINE void Viewer::Animate(Eigen::Vector3f root, Eigen::Vector3f endpoint, ViewerData* cy, Eigen::Vector3f destPoint) {
 	  Eigen::Vector3f RD(destPoint - root);
 	  Eigen::Vector3f RE(endpoint - root);
-	  float angle = acos( RE.normalized().dot(RD.normalized()) );
-	  angle = angle / 10;
+      // float angle = acos(RE.normalized().dot(RD.normalized())) / 5;
+      float angle = acos((RE.dot(RD))/(RE.norm()*RD.norm())) / 5;
 	  
       /*Eigen::Matrix3f rot = Eigen::AngleAxisf(angle, (RE.cross(RD)).normalized()).matrix();
 	  float angleY0 = atan2(rot(0, 1), rot(2, 1));
@@ -558,8 +563,8 @@ namespace glfw
           return false;
       
       if (tree0->is_leaf() && tree1->is_leaf()) {
-          data_list[0].drawBox(tree0->m_box, Eigen::RowVector3d::Random().normalized());
-          data_list[1].drawBox(tree1->m_box, Eigen::RowVector3d::Random().normalized());
+          // data_list[0].drawBox(tree0->m_box, Eigen::RowVector3d::Random().normalized());
+          // data_list[1].drawBox(tree1->m_box, Eigen::RowVector3d::Random().normalized());
           return true;
       } else if (tree0->is_leaf()) {
           return recursionIsIntersection(tree0, tree1->m_left, model0, model1, Rot0, Rot1) ||

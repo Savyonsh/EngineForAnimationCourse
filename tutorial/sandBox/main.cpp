@@ -304,6 +304,7 @@ int main(int argc, char* argv[])
 	Init(*disp);
 	renderer.init(&viewer,800, 1000);	
 	disp->SetRenderer(&renderer);
+	std::cout << viewer.usage << std::endl;
 	disp->launch_rendering(true);
 	delete disp;
 }
