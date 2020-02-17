@@ -147,12 +147,14 @@ bool Display::launch_rendering(bool loop)
 	igl::opengl::ViewerData* first = nullptr;
 	igl::opengl::ViewerData* current = nullptr;
 	igl::AABB<Eigen::MatrixXd, 3>* tree0, * tree1;
+	igl::opengl::ViewerCore* core = &(((Renderer*)glfwGetWindowUserPointer(this->window))->core(2));
 	Eigen::Matrix4d model0, model1;
 	Eigen::Matrix3d Rot0, Rot1;
 	vector<double> secondsPerSphere;
 	Vector3f destPoint;
 	int index_top = 0;
 	int i = 0;
+	bool didIPrintAlready = false;
 
 	// Finding the first and last cylinder
 	for (unsigned int i = 0; i < scn->data_list.size(); i++) {
@@ -166,23 +168,13 @@ bool Display::launch_rendering(bool loop)
 	}	
 	tree1 = &(scn->data_list[index_top].tree);
 
-	// Variables for intersection test
-	igl::AABB<Eigen::MatrixXd, 3> *tree0, *tree1 = &(scn->data_list[index_top].tree);
-	Eigen::Matrix4d model0, model1;
-	Eigen::Matrix3d Rot0, Rot1;
-	igl::opengl::ViewerCore* core = &(renderer->core(2));
-
-	// Starting the game
-	bool didIPrintAlready = false;
+	// Starting the game	
 	std::cout << "Round " << ++(renderer->round) << " is starting now!" << std::endl;
-	renderer->round_start_time = std::chrono::system_clock::now();
+	renderer->round_start_time = std::chrono::system_clock::now(); 
 
 	// Initializing time for spheres
-	for (igl::opengl::ViewerData* sphere : scn->spheres) {
-		secondsPerSphere.push_back(0);
-	}
-
-	igl::opengl::ViewerCore* core = &(((Renderer*)glfwGetWindowUserPointer(this->window))->core(2));
+	for (igl::opengl::ViewerData* sphere : scn->spheres) 
+		secondsPerSphere.push_back(0);	
 	
 	while (!glfwWindowShouldClose(window))
 	{
@@ -190,50 +182,71 @@ bool Display::launch_rendering(bool loop)
 		if (std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now() - renderer->round_start_time).count() < renderer->round_length) {
 			// Falling animation for spheres 
 			for (auto sphere : scn->spheres) {
-				if (sphere->should_appear) {
-					if ((scn->MakeTrans() * sphere->MakeTrans() * sphere->bottomF)(1)
-						<= first->getBottomInWorld(scn->MakeTrans())(1)) {
-						if ((sphere->direction(1) > 0 && sphere->velocity < 0.02))
-							sphere->move_model = false;
-						else
-							sphere->direction = -sphere->direction;
-					} else if ((sphere->direction(1) > 0 && sphere->velocity < 0.0000000001))
-						sphere->direction = -sphere->direction;
-					if (sphere->move_model) {
-						if (sphere->direction(1) < 0)
-							sphere->velocity += 0.07;
-						else {
-							sphere->velocity -= 0.1;
-						}
-						sphere->Translate(sphere->velocity * sphere->direction);
+				// sphere is out of range
+				if (!sphere->should_appear)
+				{
+					scn->randomizeSphereLocation(sphere);
+					sphere->velocityX = sphere->velocityY = sphere->velocityZ = 0.5;
+					sphere->should_appear = true;
+					sphere->move_model = true;
+				}
+				if (sphere->move_model) {
+					// Move sphere
+					sphere->Translate(Vector3f(sphere->direction(0) * sphere->velocityX,
+						sphere->direction(1) * sphere->velocityY,
+						sphere->direction(2) * sphere->velocityZ));
+
+					// Check if sphere is in range (on screen) 
+					Vector4f centerS = scn->MakeTrans() * sphere->MakeTrans() * Vector4f(0, 0, 0, 1);
+					Vector3f centerF = first->getBottomInWorld(scn->MakeTrans());
+					if (sqrt(pow(centerS(0) - centerF(0), 2) +
+						pow(centerS(1) - centerF(1), 2) +
+						pow(centerS(2) - centerF(2), 2)) >= 30) {
+						sphere->should_appear = false;
+						continue;
+					}
+					// Add falling effect if sphere moves in y direction
+					if (abs(sphere->direction(1)) >= 0.4) {
+
+						// Add gravity according to sphere's y direction
+						(sphere->direction(1) < 0) ? sphere->velocityY += 0.07 : sphere->velocityY -= 0.1;
+					}
+
+					// Change direction of sphere if sphere isn't "zero" and touches the ground
+					if (abs((scn->MakeTrans() * sphere->MakeTrans() * sphere->bottomF)(1)
+						- first->getBottomInWorld(scn->MakeTrans())(1)) <= pow(1.0, -16)
+						&& abs(sphere->velocityY) >= 0.3) {
+						sphere->direction(1) = -sphere->direction(1);
+					}
+
+					if (abs((scn->MakeTrans() * sphere->MakeTrans() * sphere->bottomF)(1)
+						- first->getBottomInWorld(scn->MakeTrans())(1)) <= pow(1.0, -16)
+						&& abs(sphere->velocityY) < pow(1.0, -3)) {
+						sphere->move_model = false;
+						secondsPerSphere.at(i) = igl::get_seconds();
 					}
 				}
+
+				// Checking how long sphere stayed on the ground
+				else {
+					if (secondsPerSphere.at(i) > 0 && abs(secondsPerSphere.at(i) - igl::get_seconds()) > 2)
+						sphere->should_appear = false;
+				}
+				i++;
 			}
-			// ------------------------------//
+
+			i = 0;
 			if (scn->isIk) {
 				// calculate the destenation point every loop as the selected shpere moves as well
 				destPoint = (scn->MakeTrans() * scn->data().MakeTrans() * Vector4f(0, 0, 0, 1)).block<3, 1>(0, 0);
-				bottom = first->getBottomInWorld(scn->MakeTrans());
-				if (sqrt(pow(destPoint(0) - bottom(0), 2) +
-						 pow(destPoint(1) - bottom(1), 2) +
-						 pow(destPoint(2) - bottom(2), 2)) <= scn->lengthOfArm - 0.5) {
+				Eigen::Vector3f bottom = first->getBottomInWorld(scn->MakeTrans());
+				float distance = sqrt(pow(destPoint(0) - bottom(0), 2) +
+					pow(destPoint(1) - bottom(1), 2) +
+					pow(destPoint(2) - bottom(2), 2));
+				if (distance <= scn->lengthOfArm)
+				{
 					CalculateIK(scn, last, destPoint);
 					first->UpdateCamera(core->camera_eye, core->camera_up, core->camera_translation, scn->MakeTrans());
-					//  if (my_distance(scn, first) > scn->lengthofarm - 0.5) {
-					//		cout << "distance too far." << endl;
-					//		scn->isik = false;
-					//		continue;
-					//	}
-					//	float delta;
-					//	Eigen::Vector3f top = last->getTopInWorld(scn->MakeTrans());
-					//	delta = sqrt(pow(destPoint(0) - top(0), 2) +
-					//		pow(destPoint(1) - top(1), 2) +
-					//		pow(destPoint(2) - top(2), 2));				
-					//	if (delta <= 0.1 && delta > 0) {
-					//		scn->isIk = false;
-					//		scn->data().should_appear = false;
-					//		scn->data().move_model = false;
-					//	}
 					tree0 = &(scn->data().tree);
 					tree1 = &(last->tree);
 					model0 = scn->data().MakeTransD();
@@ -248,29 +261,21 @@ bool Display::launch_rendering(bool loop)
 					if (scn->recursionIsIntersection(tree0, tree1, model0, model1, Rot0, Rot1)) {
 						scn->isIk = false;
 						scn->data().should_appear = false;
-						scn->randomizeSphereLocation(&scn->data());
-						renderer->score += renderer->round * renderer->score_multi * 10;
-						std::cout << "Your current score: " << renderer->score << std::endl;
+						scn->data().move_model = false;
 					}
-				} else {
+				}
+				else {
 					cout << "Distance too far." << endl;
 					scn->isIk = false;
 				}
 			}
-			//if (scn->move_models) {
-			//	scn->data().Translate(scn->data().velocity * scn->data().direction);
-			//	scn->isIntersection();
-			//}		
 		} else {
 			if (!didIPrintAlready) {
 				std::cout << "Would you like to go another round? (Press Y/N)" << std::endl;
 				didIPrintAlready = true;
-
 				scn->isIk = false;
-				for (auto i = 0; i < scn->data_list.size(); i++) {
-					if (!strcmp(&scn->data_list[i].model[0], "sphere")) {
-						scn->data_list[i].move_model = false;
-					}
+				for (igl::opengl::ViewerData* sphere : scn->spheres) {
+					sphere->move_model = false;
 				}
 			}
 			
@@ -304,106 +309,9 @@ bool Display::launch_rendering(bool loop)
 				return true; // Exiting the main loop, which will close the window as well.
 			}
 		}
-
-		// Falling animation for spheres 
-		for (auto sphere : scn->spheres) {
-			// sphere is out of range
-			if (!sphere->should_appear)
-			{
-				scn->randomizeSphereLocation(sphere);
-				sphere->velocityX = sphere->velocityY = sphere->velocityZ = 0.5;
-				sphere->should_appear = true;
-				sphere->move_model = true;
-			}
-			if (sphere->move_model) {
-				// Move sphere
-				sphere->Translate(Vector3f(sphere->direction(0) * sphere->velocityX,
-					sphere->direction(1) * sphere->velocityY,
-					sphere->direction(2) * sphere->velocityZ));
-
-				// Check if sphere is in range (on screen) 
-				Vector4f centerS = scn->MakeTrans() * sphere->MakeTrans() * Vector4f(0, 0, 0, 1);
-				Vector3f centerF = first->getBottomInWorld(scn->MakeTrans());
-				if (sqrt(pow(centerS(0) - centerF(0), 2) +
-					pow(centerS(1) - centerF(1), 2) +
-					pow(centerS(2) - centerF(2), 2)) >= 30) {
-					sphere->should_appear = false;
-					continue;
-				}
-				// Add falling effect if sphere moves in y direction
-				if (abs(sphere->direction(1)) >= 0.4) {
-
-					// Add gravity according to sphere's y direction
-					(sphere->direction(1) < 0) ? sphere->velocityY += 0.07 : sphere->velocityY -= 0.1;
-				}
-
-				// Change direction of sphere if sphere isn't "zero" and touches the ground
-				if (abs((scn->MakeTrans() * sphere->MakeTrans() * sphere->bottomF)(1)
-					- first->getBottomInWorld(scn->MakeTrans())(1)) <= pow(1.0, -16)
-					&& abs(sphere->velocityY) >= 0.3) {
-					sphere->direction(1) = -sphere->direction(1);
-				}
-
-				if (abs((scn->MakeTrans() * sphere->MakeTrans() * sphere->bottomF)(1)
-					- first->getBottomInWorld(scn->MakeTrans())(1)) <= pow(1.0, -16)
-					&& abs(sphere->velocityY) < pow(1.0, -3)) {
-					sphere->move_model = false;
-					secondsPerSphere.at(i) = igl::get_seconds();
-				}				
-			}
-
-			// Checking how long sphere stayed on the ground
-			else {
-				if (secondsPerSphere.at(i) > 0 && abs(secondsPerSphere.at(i) - igl::get_seconds()) > 2)
-					sphere->should_appear = false;
-			}
-			i++;
-		}
 	
-		i = 0;
-		if (scn->isIk) {
-		// calculate the destenation point every loop as the selected shpere moves as well
-			destPoint = (scn->MakeTrans() * scn->data().MakeTrans() * Vector4f(0, 0, 0, 1)).block<3, 1>(0, 0);
-			Eigen::Vector3f bottom = first->getBottomInWorld(scn->MakeTrans());
-			float distance = sqrt(pow(destPoint(0) - bottom(0), 2) +
-				pow(destPoint(1) - bottom(1), 2) +
-				pow(destPoint(2) - bottom(2), 2));			
-			if (distance <= scn->lengthOfArm)
-			{
-				CalculateIK(scn, last, destPoint);
-				first->UpdateCamera(core->camera_eye, core->camera_up, core->camera_translation, scn->MakeTrans());
-			//	/*float delta;
-			//	Eigen::Vector3f top = last->getTopInWorld(scn->MakeTrans());
-			//	delta = sqrt(pow(destPoint(0) - top(0), 2) +
-			//		pow(destPoint(1) - top(1), 2) +
-			//		pow(destPoint(2) - top(2), 2));				
-			//	if (delta <= 0.1 && delta > 0) {
-			//		scn->isIk = false;
-			//		scn->data().should_appear = false;
-			//		scn->data().move_model = false;
-			//	}*/
-				tree0 = &(scn->data().tree);
-				tree1 = &(last->tree);
-				model0 = scn->data().MakeTransD();
-				model1 = first->MakeTransD();
-				current = first;
-				while (current->father) {
-					current = current->father;
-					model1 = model1 * current->MakeTransD();
-				}
-				Rot0 = model0.block<3, 3>(0, 0);
-				Rot1 = model1.block<3, 3>(0, 0);
-				if (scn->recursionIsIntersection(tree0, tree1, model0, model1, Rot0, Rot1)) {
-					scn->isIk = false;
-					scn->data().should_appear = false;
-					scn->data().move_model = false;
-				}
-			}
-			else {
-				cout << "Distance too far." << endl;
-				scn->isIk = false;
-			}
-		}	
+		// ------------------------------------------------------------------------------- //
+		
 		double tic = igl::get_seconds();
 			
 		renderer->draw(window);
