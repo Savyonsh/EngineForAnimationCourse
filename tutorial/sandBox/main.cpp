@@ -137,9 +137,9 @@ void adjustModels(igl::opengl::glfw::Viewer* viewer, int times) {
 
 		if (!(strcmp(&curr->model[0], "sphere"))) {
 			viewer->spheres.push_back(curr);
-			curr->MyTranslate(Eigen::Vector3f(8, 10, 0));
-			curr->direction = Eigen::Vector3f(0, -1, 0);
-			curr->velocity = 0.1f;
+			viewer->randomizeSphereLocation(curr);
+			curr->velocityY = curr->velocityX = curr->velocityZ = 0.4;
+			curr->move_model = true;
 			curr->show_lines = false;
 			//curr->should_appear = false;
 			curr->bottomF = Vector4f(curr->V.colwise().minCoeff().cast<float>()(0),
@@ -295,8 +295,8 @@ int main(int argc, char* argv[])
 	//adjustModels(&viewer);
 
 	// Assignment 3 //
-
-	int cyNum = 10, shNum = 2;
+	srand(time(0));
+	int cyNum = 10, shNum = 5;
 	if (!(read_Meshes(&viewer, "configuration.txt", cyNum, shNum))) return 1;	
 	adjustModels(&viewer, cyNum);
 	//add_texture_to_list_of_datas(viewer, "SnakeSkin.png", std::vector<int>

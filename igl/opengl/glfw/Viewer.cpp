@@ -588,13 +588,16 @@ namespace glfw
 		  maxZ = location(2) + 5;
 		  minZ = location(2) - 5;
 		  if (maxX > 0 && maxY > 0 && maxZ > 0) {
-			  srand(time(NULL));
 			  newX = rand() % maxX + minX;
 			  newY = rand() % maxY + minY;
 			  newZ = rand() % maxZ + minZ;
 			  sphere->Translate(-sphere->getTranslation());
 			  sphere->Translate(Vector3f(newX, newY, newZ));
-			  cout << newX << " " << newY << " " << newZ << endl;
+			  newX = -0.5 + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX));
+			  newY = -0.5 + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX));
+			  newZ = -0.5 + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX));
+			  sphere->direction = Vector3f(newX, newY, newZ);
+			  //cout << newX << " " << newY << " " << newZ << endl;
 			  sphere->should_appear = true;
 		  }
 	  }

@@ -119,7 +119,7 @@ public:
   
   /* SPHERE */
   Eigen::Vector3f direction;
-  float velocity;
+  float velocityX, velocityY, velocityZ;
 
   /* CYLINDER */
   bool head_of_snake = false;
