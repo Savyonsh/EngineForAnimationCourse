@@ -153,7 +153,10 @@ public:
                                  Eigen::Matrix4d& model0, Eigen::Matrix4d& model1,
                                  Eigen::Matrix3d& Rot0, Eigen::Matrix3d& Rot1);
 	bool move_models = false;
+	void randomizeSphereLocation(ViewerData* sphere);
 	std::vector<ViewerData*> spheres;
+	ViewerData* firstCy = nullptr;
+	ViewerData* lastCy = nullptr;
     
 
     // List of registered plugins

@@ -575,6 +575,30 @@ namespace glfw
       }
   }
 
+  void IGL_INLINE Viewer::randomizeSphereLocation(ViewerData* sphere) {
+
+	  float newX, newY, newZ;
+		int minX, maxX, minY, maxY, minZ, maxZ;
+	  Vector4f location(lastCy->getTranslation()(0), lastCy->getTranslation()(1), lastCy->getTranslation()(2), 1);
+	  if (lastCy) {
+		  maxX = location(0) + 10;
+		  minX = location(0);
+		  maxY = location(1) + 20;
+		  minY = location(1);
+		  maxZ = location(2) + 5;
+		  minZ = location(2) - 5;
+		  if (maxX > 0 && maxY > 0 && maxZ > 0) {
+			  srand(time(NULL));
+			  newX = rand() % maxX + minX;
+			  newY = rand() % maxY + minY;
+			  newZ = rand() % maxZ + minZ;
+			  sphere->Translate(-sphere->getTranslation());
+			  sphere->Translate(Vector3f(newX, newY, newZ));
+			  cout << newX << " " << newY << " " << newZ << endl;
+			  sphere->should_appear = true;
+		  }
+	  }
+  }
 } // end namespace
 } // end namespace
 }

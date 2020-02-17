@@ -305,15 +305,16 @@ static void glfw_key_callback(GLFWwindow* window, int key, int scancode, int act
 		case 'R':
 		case 'r':
 		{
-			igl::AABB<Eigen::MatrixXd, 3>* tree0 = &(scn->data().tree);
-			igl::AABB<Eigen::MatrixXd, 3>* tree1 = &(scn->data_list[2].tree);
-			Eigen::Matrix4d& model0 = scn->data().MakeTransD();
-			Eigen::Matrix4d model1 = scn->data_list[0].MakeTransD() * scn->data_list[1].MakeTransD() * scn->data_list[2].MakeTransD();
-			Eigen::Matrix3d Rot0 = model0.block<3, 3>(0, 0);
-			Eigen::Matrix3d Rot1 = model1.block<3, 3>(0, 0);
-			bool result = scn->recursionIsIntersection(tree0, tree1, model0, model1, Rot0, Rot1);
-			std::cout << (result ? "Hitting each other" : "Doesn't hit each other") << std::endl;
-			break;
+			//igl::AABB<Eigen::MatrixXd, 3>* tree0 = &(scn->data().tree);
+			//igl::AABB<Eigen::MatrixXd, 3>* tree1 = &(scn->data_list[2].tree);
+			//Eigen::Matrix4d& model0 = scn->data().MakeTransD();
+			//Eigen::Matrix4d model1 = scn->data_list[0].MakeTransD() * scn->data_list[1].MakeTransD() * scn->data_list[2].MakeTransD();
+			//Eigen::Matrix3d Rot0 = model0.block<3, 3>(0, 0);
+			//Eigen::Matrix3d Rot1 = model1.block<3, 3>(0, 0);
+			//bool result = scn->recursionIsIntersection(tree0, tree1, model0, model1, Rot0, Rot1);
+			//std::cout << (result ? "Hitting each other" : "Doesn't hit each other") << std::endl;
+			//break;
+			scn->data().Translate(Vector3f(5, 4, 0));
 		}
 		case GLFW_KEY_UP:
 			if (scn->worldSelect)

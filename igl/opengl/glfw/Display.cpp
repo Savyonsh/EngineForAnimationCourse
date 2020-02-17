@@ -181,7 +181,7 @@ bool Display::launch_rendering(bool loop)
 		}
 		// ------------------------------//
 		if (scn->isIk) {
-			// calculate the destenation point every loop as the selected shpere moves as well
+		// calculate the destenation point every loop as the selected shpere moves as well
 			destPoint = (scn->MakeTrans() * scn->data().MakeTrans() * Vector4f(0, 0, 0, 1)).block<3, 1>(0, 0);
 			Eigen::Vector3f bottom = first->getBottomInWorld(scn->MakeTrans());
 			float distance = sqrt(pow(destPoint(0) - bottom(0), 2) +
@@ -191,39 +191,31 @@ bool Display::launch_rendering(bool loop)
 			{
 				CalculateIK(scn, last, destPoint);
 				first->UpdateCamera(core->camera_eye, core->camera_up, core->camera_translation, scn->MakeTrans());
-				//// check if there is an intersection between the top and the selected sphere
-				//if (scn->isIntersection(index_top, scn->selected_data_index)) {
-				//	scn->isIk = false;
-				//	//scn->data().should_appear = false;
-				//	scn->data().move_model = false;
-				//}
-
-				/*float delta;
-				Eigen::Vector3f top = last->getTopInWorld(scn->MakeTrans());
-				delta = sqrt(pow(destPoint(0) - top(0), 2) +
-					pow(destPoint(1) - top(1), 2) +
-					pow(destPoint(2) - top(2), 2));				
-				if (delta <= 0.1 && delta > 0) {
-					scn->isIk = false;
-					scn->data().should_appear = false;
-					scn->data().move_model = false;
-				}*/
+			//	/*float delta;
+			//	Eigen::Vector3f top = last->getTopInWorld(scn->MakeTrans());
+			//	delta = sqrt(pow(destPoint(0) - top(0), 2) +
+			//		pow(destPoint(1) - top(1), 2) +
+			//		pow(destPoint(2) - top(2), 2));				
+			//	if (delta <= 0.1 && delta > 0) {
+			//		scn->isIk = false;
+			//		scn->data().should_appear = false;
+			//		scn->data().move_model = false;
+			//	}*/
 				tree0 = &(scn->data().tree);
 				tree1 = &(last->tree);
 				model0 = scn->data().MakeTransD();
 				model1 = first->MakeTransD();
 				current = first;
-				while (current->father != nullptr) {
+				while (current->father) {
 					current = current->father;
 					model1 = model1 * current->MakeTransD();
 				}
 				Rot0 = model0.block<3, 3>(0, 0);
 				Rot1 = model1.block<3, 3>(0, 0);
-				bool result = scn->recursionIsIntersection(tree0, tree1, model0, model1, Rot0, Rot1);
-				if (result) {
+				if (scn->recursionIsIntersection(tree0, tree1, model0, model1, Rot0, Rot1)) {
 					scn->isIk = false;
 					scn->data().should_appear = false;
-					scn->data().move_model = false;
+					scn->randomizeSphereLocation(&scn->data());
 				}
 			}
 			else {

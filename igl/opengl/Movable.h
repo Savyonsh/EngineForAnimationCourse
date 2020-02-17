@@ -23,6 +23,7 @@ public:
 	void RotateInSystem(Eigen::Matrix4f mat, Eigen::Vector3f rotAxis, float angle, bool preRotation);
 	void SetCenterOfRotation(Eigen::Vector3f amt);
 	Eigen::Matrix3f getRotation();
+	Eigen::Vector3f getTranslation() { return Tout.translation(); }
 	Eigen::Vector3f GetCenterOfRotation();
 private:
 	Eigen::Transform<float, 3, Eigen::Affine> Tout;

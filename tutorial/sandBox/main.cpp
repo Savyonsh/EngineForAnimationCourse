@@ -137,10 +137,11 @@ void adjustModels(igl::opengl::glfw::Viewer* viewer, int times) {
 
 		if (!(strcmp(&curr->model[0], "sphere"))) {
 			viewer->spheres.push_back(curr);
-			curr->MyTranslate(Eigen::Vector3f(4*counterSh, 5*counterSh++, 0));
+			curr->MyTranslate(Eigen::Vector3f(8, 10, 0));
 			curr->direction = Eigen::Vector3f(0, -1, 0);
 			curr->velocity = 0.1f;
 			curr->show_lines = false;
+			//curr->should_appear = false;
 			curr->bottomF = Vector4f(curr->V.colwise().minCoeff().cast<float>()(0),
 				curr->V.colwise().minCoeff().cast<float>()(1),
 				curr->V.colwise().minCoeff().cast<float>()(2), 1);
@@ -154,7 +155,7 @@ void adjustModels(igl::opengl::glfw::Viewer* viewer, int times) {
 			m = curr->V.colwise().minCoeff();
 			M = curr->V.colwise().maxCoeff();
 			// Calculating only once, for the first cylinder.
-			if (first) {
+			if (first) {				
 				axisPoints <<
 					0, m(1), 0,							// Zero
 					(M(0) + m(0)) / 2 + 1, m(1), 0,		// X
@@ -174,6 +175,7 @@ void adjustModels(igl::opengl::glfw::Viewer* viewer, int times) {
 				widOfCy = M(0) - m(0);
 				girthOfCy = M(2) - m(2);
 				viewer->lengthOfArm = lenOfCy * times;
+				viewer->firstCy = curr;
 				first = false;
 			}
 
@@ -212,6 +214,7 @@ void adjustModels(igl::opengl::glfw::Viewer* viewer, int times) {
 				curr->MyTranslate(Eigen::Vector3f(0, -lenOfCy / 2 + 0.3, 0));
 				curr->MyScale(Eigen::Vector3f(1, 2, 1));
 				curr->MyScale(Eigen::Vector3f(widOfCy / widOfSphere, 1.2, girthOfCy / girthOfSphere));
+				viewer->lastCy = curr;
 			}
 
 			curr->SetCenterOfRotation(curr->bottom);
@@ -220,7 +223,7 @@ void adjustModels(igl::opengl::glfw::Viewer* viewer, int times) {
 
 	}
 	// Adjusting the "camera"
-	viewer->MyTranslate(Eigen::Vector3f(-8, -10, -30));
+	viewer->MyTranslate(Eigen::Vector3f(-5, -10, -30));
 	//viewer->MyTranslate(Eigen::Vector3f(-1, -2, -7));
 }
 
@@ -284,6 +287,8 @@ int main(int argc, char* argv[])
 	Display* disp = new Display(1000, 800, "Wellcome");
 	Renderer renderer;
 	igl::opengl::glfw::Viewer viewer;
+
+
 	// Assignment 4 //
 
 	//if (!(read_Meshes(&viewer, "configuration.txt"))) return 1;
@@ -291,7 +296,7 @@ int main(int argc, char* argv[])
 
 	// Assignment 3 //
 
-	int cyNum = 10, shNum = 5;
+	int cyNum = 10, shNum = 2;
 	if (!(read_Meshes(&viewer, "configuration.txt", cyNum, shNum))) return 1;	
 	adjustModels(&viewer, cyNum);
 	//add_texture_to_list_of_datas(viewer, "SnakeSkin.png", std::vector<int>
