@@ -102,7 +102,7 @@ public:
 	}
 
 	// Game stuff //
-	int score, round, flag_next_round, cyNum;
+	int score, round, flag_next_round;
 	#define UNANSWERED_NEXT_ROUND	2
 	#define YES_NEXT_ROUND			1
 	#define NO_NEXT_ROUND			0

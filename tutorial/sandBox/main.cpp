@@ -10,54 +10,6 @@
 
 using namespace std;
 
-// Assignment 4 //
-//bool read_Meshes(igl::opengl::glfw::Viewer* viewer, string file) {
-//	ifstream conFile;
-//	string line;
-//	string model_name;
-//	int times;
-//	int selectedIndex = 0;
-//	conFile.open(file, ios::in);
-//	if (conFile.is_open()) {
-//		while (getline(conFile, line)) {
-//			viewer->load_mesh_from_file(line);			
-//			viewer->load_mesh_from_file(line);
-//			break;
-//		}
-//		conFile.close();		
-//		return true;
-//	}
-//	else {
-//		cout << "Error: No configuration. \n" << endl;
-//		return false;
-//	}
-//}
-
-//void adjustModels(igl::opengl::glfw::Viewer* viewer) {
-//
-//	for (auto i = 0; i < 2; i++) {
-//		viewer->selected_data_index = i;
-//		viewer->data().MyRotateX(2.5);
-//		viewer->data().MyRotateY(0.35);
-//		float val;
-//		i == 0 ? val = 1.5 : val = -1.5;
-//		viewer->data().Translate(Vector3f(val, 0, 0));
-//		viewer->data().velocity = 0.05;
-//		i == 0 ? val = -1 : val = 1;
-//		viewer->data().direction = Vector3f(val, 0, 0);
-//		viewer->data().show_lines = false;
-//		i == 1 ? viewer->data().uniform_colors(Eigen::Vector3d(1.0, 0.0, 0.0),
-//			Eigen::Vector3d(0.5, 0.3, 0.35),
-//			Eigen::Vector3d(1.0, 0.5, 0.5)) : 0;
-//		viewer->data().drawBox(viewer->data().tree.m_box, Eigen::RowVector3d(0, 255, 0));
-//	}
-//	// Adjusting the "camera"
-//	viewer->MyTranslate(Vector3f(0, 0, -2));
-//	// viewer->TranslateInSystem(viewer->MakeTrans(), Vector3f(0, 0, -2), true);
-//}
-
-// Assignment 3 //
-
 bool read_Meshes(igl::opengl::glfw::Viewer* viewer, string file, int amountOfCy, int amountOfSh) {
 	ifstream conFile;
 	string line;
@@ -117,7 +69,7 @@ bool read_Meshes(igl::opengl::glfw::Viewer* viewer, string file, int amountOfCy,
 	}
 }
 
-/*void adjustModels(igl::opengl::glfw::Viewer* viewer, int times) {
+void adjustModels(igl::opengl::glfw::Viewer* viewer, int times) {
 	bool first = true;
 	bool firstSphere = true;
 	int i;
@@ -142,7 +94,6 @@ bool read_Meshes(igl::opengl::glfw::Viewer* viewer, string file, int amountOfCy,
 			curr->velocityY = curr->velocityX = curr->velocityZ = 0.4;
 			curr->move_model = true;
 			curr->show_lines = false;
-			//curr->should_appear = false;
 			curr->bottomF = Vector4f(curr->V.colwise().minCoeff().cast<float>()(0),
 				curr->V.colwise().minCoeff().cast<float>()(1),
 				curr->V.colwise().minCoeff().cast<float>()(2), 1);
@@ -215,7 +166,14 @@ bool read_Meshes(igl::opengl::glfw::Viewer* viewer, string file, int amountOfCy,
 				curr->MyTranslate(Eigen::Vector3f(0, -lenOfCy / 2 + 0.3, 0));
 				curr->MyScale(Eigen::Vector3f(1, 2, 1));
 				curr->MyScale(Eigen::Vector3f(widOfCy / widOfSphere, 1.2, girthOfCy / girthOfSphere));
+
+				// Save for adjusting after ending round
 				viewer->lastCy = curr;
+				viewer->widOfSphere = widOfSphere;
+				viewer->girthOfSphere = girthOfSphere;
+				viewer->lengthOfSphere = lengthOfSphere;
+				viewer->widOfCy = widOfCy;
+				viewer->girthOfCy = girthOfCy;
 			}
 
 			curr->SetCenterOfRotation(curr->bottom);
@@ -223,10 +181,12 @@ bool read_Meshes(igl::opengl::glfw::Viewer* viewer, string file, int amountOfCy,
 		}
 
 	}
+
+	viewer->lenOfCy = lenOfCy;
 	// Adjusting the "camera"
 	viewer->MyTranslate(Eigen::Vector3f(-5, -10, -30));
 	//viewer->MyTranslate(Eigen::Vector3f(-1, -2, -7));
-}*/
+}
 
 /*
 * Explaing the function:
@@ -289,20 +249,16 @@ int main(int argc, char* argv[])
 	Renderer renderer;
 	igl::opengl::glfw::Viewer viewer;
 
-
-	// Assignment 4 //
-
-	//if (!(read_Meshes(&viewer, "configuration.txt"))) return 1;
-	//adjustModels(&viewer);
-
-	// Assignment 3 //
+	// Initializng seed for randomizing moving balls
 	srand(time(0));
-	renderer.cyNum = 10;
+	int cyNum = 10;
 	int shNum = 5;
-	if (!(read_Meshes(&viewer, "configuration.txt", renderer.cyNum, shNum))) return 1;
-	adjustModels(&viewer, renderer.cyNum, true);
+	if (!(read_Meshes(&viewer, "configuration.txt", cyNum, shNum))) return 1;
+	adjustModels(&viewer, cyNum);
+
 	//add_texture_to_list_of_datas(viewer, "SnakeSkin.png", std::vector<int>
 		//{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}, true, 5);	
+
 	Init(*disp);
 	renderer.init(&viewer,800, 1000);	
 	disp->SetRenderer(&renderer);

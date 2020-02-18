@@ -147,7 +147,7 @@ bool Display::launch_rendering(bool loop)
 	igl::opengl::ViewerData* first = nullptr;
 	igl::opengl::ViewerData* current = nullptr;
 	igl::AABB<Eigen::MatrixXd, 3>* tree0, * tree1;
-	igl::opengl::ViewerCore* core = &(((Renderer*)glfwGetWindowUserPointer(this->window))->core(2));
+	igl::opengl::ViewerCore* core;
 	Eigen::Matrix4d model0, model1;
 	Eigen::Matrix3d Rot0, Rot1;
 	vector<double> secondsPerSphere;
@@ -176,6 +176,8 @@ bool Display::launch_rendering(bool loop)
 	// Initializing time for spheres
 	for (igl::opengl::ViewerData* sphere : scn->spheres) 
 		secondsPerSphere.push_back(0);	
+
+	core = &(((Renderer*)glfwGetWindowUserPointer(this->window))->core(2));
 	
 	while (!glfwWindowShouldClose(window))
 	{
@@ -272,7 +274,8 @@ bool Display::launch_rendering(bool loop)
 					scn->isIk = false;
 				}
 			}
-		} else {
+		}
+		else {
 			if (!didIPrintAlready) {
 				std::cout << "Would you like to go another round? (Press Y/N)" << std::endl;
 				didIPrintAlready = true;
@@ -282,7 +285,7 @@ bool Display::launch_rendering(bool loop)
 					sphere->move_model = false;
 				}
 			}
-			
+
 			if (renderer->flag_next_round == YES_NEXT_ROUND) {
 				for (auto i = 0; i < scn->data_list.size(); i++) {
 					// Reset the Position of all the objects
@@ -290,15 +293,17 @@ bool Display::launch_rendering(bool loop)
 
 					if (!strcmp(&scn->data_list[i].model[0], "sphere")) {
 						// Letting the balls move again
+						scn->randomizeSphereLocation(&scn->data_list[i]);
 						scn->data_list[i].move_model = true;
-
-						// TODO: Speed up the ball's velocity
-
+						scn->data_list[i].velocityX =
+							scn->data_list[i].velocityY =
+							scn->data_list[i].velocityZ =
+							0.4 * renderer->round;
 					}
 				}
 				// set the snake & balls locations at the starting position
 				scn->ResetMovable();
-				adjustModels(scn, renderer->cyNum, false);
+				adjustModels(scn);
 				first->UpdateCamera(core->camera_eye, core->camera_up, core->camera_translation, scn->MakeTrans());
 
 				std::cout << "Round " << ++(renderer->round) << " is starting now!" << std::endl;
@@ -309,7 +314,8 @@ bool Display::launch_rendering(bool loop)
 				renderer->isGamePaused = false;
 				renderer->round_start_time = std::chrono::system_clock::now();
 
-			} else if (renderer->flag_next_round == NO_NEXT_ROUND) {
+			}
+			else if (renderer->flag_next_round == NO_NEXT_ROUND) {
 				std::cout << "Your final score: " << renderer->score << std::endl;
 				return true; // Exiting the main loop, which will close the window as well.
 			}

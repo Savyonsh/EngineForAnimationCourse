@@ -142,6 +142,12 @@ public:
 	// Assignment 3
 
 	float lengthOfArm;
+	float lenOfCy;
+	float widOfSphere;
+	float widOfCy;
+	float girthOfSphere;
+	float girthOfCy;
+	float lengthOfSphere;
 	bool isIk = false;
 
 	// Assignment 4
