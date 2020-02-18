@@ -189,10 +189,11 @@ bool Display::launch_rendering(bool loop)
 				if (!sphere->should_appear)
 				{
 					scn->randomizeSphereLocation(sphere);
-					sphere->velocityX = sphere->velocityY = sphere->velocityZ = 0.5;
+					sphere->velocityX = sphere->velocityY = sphere->velocityZ = 0.4 * renderer->round;
 					sphere->should_appear = true;
 					sphere->move_model = true;
 				}
+
 				if (sphere->move_model) {
 					// Move sphere
 					sphere->Translate(Vector3f(sphere->direction(0) * sphere->velocityX,
@@ -209,21 +210,19 @@ bool Display::launch_rendering(bool loop)
 						continue;
 					}
 					// Add falling effect if sphere moves in y direction
-					if (abs(sphere->direction(1)) >= 0.4) {
-
-						// Add gravity according to sphere's y direction
-						(sphere->direction(1) < 0) ? sphere->velocityY += 0.07 : sphere->velocityY -= 0.1;
-					}
+					if (sphere->direction(1) * sphere->velocityY > 0)
+						sphere->velocityY += 0.1;
+					else sphere->velocityY += 0.06;
 
 					// Change direction of sphere if sphere isn't "zero" and touches the ground
 					if (abs((scn->MakeTrans() * sphere->MakeTrans() * sphere->bottomF)(1)
 						- first->getBottomInWorld(scn->MakeTrans())(1)) <= pow(1.0, -16)
 						&& abs(sphere->velocityY) >= 0.3) {
-						sphere->direction(1) = -sphere->direction(1);
+						sphere->velocityY = -sphere->velocityY;
 					}
 
-					if (abs((scn->MakeTrans() * sphere->MakeTrans() * sphere->bottomF)(1)
-						- first->getBottomInWorld(scn->MakeTrans())(1)) <= pow(1.0, -16)
+					if ((scn->MakeTrans() * sphere->MakeTrans() * sphere->bottomF)(1)
+						- first->getBottomInWorld(scn->MakeTrans())(1) <= pow(1.0, -16)
 						&& abs(sphere->velocityY) < pow(1.0, -3)) {
 						sphere->move_model = false;
 						secondsPerSphere.at(i) = igl::get_seconds();

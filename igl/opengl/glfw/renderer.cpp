@@ -122,7 +122,8 @@ IGL_INLINE void Renderer::init(igl::opengl::glfw::Viewer* viewer, int height, in
 	for (int i = 0; i < viewer->data_list.size(); i++) {
 		core_list[1].toggle(viewer->data_list[i].show_faces);   // To show mesh itself
 		core_list[1].toggle(viewer->data_list[i].show_overlay); // To show edges / points
-		core_list[1].toggle(viewer->data_list[i].show_texture); // To show texture
+		if (strcmp(&viewer->data_list[i].model[0], "sphere"))
+			core_list[1].toggle(viewer->data_list[i].show_texture); // To show texture
 	}
 	// Those are the default values of the eye (each of them is Vector3f), no need to init here as default values, unless we want it to be different.
 	//core_list[1].camera_eye << 0, 0, 5;

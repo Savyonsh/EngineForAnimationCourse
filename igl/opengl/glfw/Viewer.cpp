@@ -583,44 +583,54 @@ namespace glfw
   }
 
   void IGL_INLINE Viewer::randomizeSphereLocation(ViewerData* sphere) {
-
 	  float newX, newY, newZ;
-		int minX, maxX, minY, maxY, minZ, maxZ;
-	  Vector4f location(lastCy->getTranslation()(0), lastCy->getTranslation()(1), lastCy->getTranslation()(2), 1);
-	  if (lastCy) {
-		  maxX = location(0) + 10;
-		  minX = location(0);
-		  maxY = location(1) + 20;
-		  minY = location(1);
-		  maxZ = location(2) + 5;
-		  minZ = location(2) - 5;
-		  if (maxX > 0 && maxY > 0 && maxZ > 0) {
+	  int minX, maxX, minY, maxY, minZ, maxZ;
+	  Vector4f location;
+	  Matrix4f product = Matrix4f::Identity();
+	  ViewerData* curr = firstCy;
 
-			  // Location x, y, z distance according to last cy
-			  newX = rand() % maxX + minX;
-			  newY = rand() % maxY + minY;
-			  newZ = rand() % maxZ + minZ;
-			  sphere->Translate(-sphere->getTranslation());
-			  sphere->Translate(Vector3f(newX, newY, newZ));
+	  while (curr) {
+		  product = product * curr->MakeTrans();
+		  curr = curr->father;
+	  }
 
-			  // Direction - [-0.5, 0.5]
-			  newX = -0.5 + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX));
-			  newY = -0.5 + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX));
-			  newZ = -0.5 + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX));
-			  sphere->direction = Vector3f(newX, newY, newZ);
+	  // Center of last cylinder
+	  location = product * Vector4f(0, 0, 0, 1);
 
-			  // Color - [0,1]
-			  newX = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX));
-			  newY = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX));
-			  newZ = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX));
+	  maxX = location(0) + 10;
+	  minX = location(0) - 5;
+	  maxY = location(1) + 10;
+	  minY = location(1) - 5;
+	  maxZ = location(2) + 5;
+	  minZ = location(2) - 5;
+	  if (maxX > 0 && maxY > 0 && maxZ > 0) {
 
-			  sphere->uniform_colors(Eigen::Vector3d(newX, newY, newZ),
-				  Eigen::Vector3d(newX - 0.1, newY - 0.1, newZ - 0.1),
-				  Eigen::Vector3d(0.5, 0.5, 0.5));
+		  // Randomize X Y and Z points around lastCy
+		  newX = rand() % maxX + minX;
+		  newY = rand() % maxY + minY;
+		  newZ = rand() % maxZ + minZ;
 
-			  sphere->should_appear = true;
+		  // Reset translation and move it to it's new place
+		  sphere->Translate(-sphere->getTranslation());
+		  sphere->Translate(Vector3f(newX, newY, newZ));
 
-		  }
+		  // Randomize new direction vector - [-0.5, 0.5]
+		  newX = -0.5 + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX));
+		  newY = -0.5 + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX));
+		  newZ = -0.5 + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX));
+		  sphere->direction = Vector3f(newX, newY, newZ);
+
+		  // Randomize new color - [0,1]
+		  newX = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX));
+		  newY = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX));
+		  newZ = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX));
+
+		  sphere->uniform_colors(Eigen::Vector3d(newX, newY, newZ),
+			  Eigen::Vector3d(newX - 0.1, newY - 0.1, newZ - 0.1),
+			  Eigen::Vector3d(0.5, 0.5, 0.5));
+
+		  sphere->should_appear = true;
+
 	  }
   }
 } // end namespace
