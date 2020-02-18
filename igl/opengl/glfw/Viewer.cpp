@@ -595,17 +595,31 @@ namespace glfw
 		  maxZ = location(2) + 5;
 		  minZ = location(2) - 5;
 		  if (maxX > 0 && maxY > 0 && maxZ > 0) {
+
+			  // Location x, y, z distance according to last cy
 			  newX = rand() % maxX + minX;
 			  newY = rand() % maxY + minY;
 			  newZ = rand() % maxZ + minZ;
 			  sphere->Translate(-sphere->getTranslation());
 			  sphere->Translate(Vector3f(newX, newY, newZ));
+
+			  // Direction - [-0.5, 0.5]
 			  newX = -0.5 + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX));
 			  newY = -0.5 + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX));
 			  newZ = -0.5 + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX));
 			  sphere->direction = Vector3f(newX, newY, newZ);
-			  //cout << newX << " " << newY << " " << newZ << endl;
+
+			  // Color - [0,1]
+			  newX = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX));
+			  newY = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX));
+			  newZ = static_cast <float> (rand()) / (static_cast <float> (RAND_MAX));
+
+			  sphere->uniform_colors(Eigen::Vector3d(newX, newY, newZ),
+				  Eigen::Vector3d(newX - 0.1, newY - 0.1, newZ - 0.1),
+				  Eigen::Vector3d(0.5, 0.5, 0.5));
+
 			  sphere->should_appear = true;
+
 		  }
 	  }
   }
