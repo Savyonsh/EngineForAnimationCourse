@@ -239,7 +239,7 @@ bool Display::launch_rendering(bool loop)
 			}
 
 			i = 0;
-			if (scn->isIk) {
+			if (scn->isIk && !strcmp(&(scn->data().model[0]), "sphere")) {
 				// calculate the destenation point every loop as the selected shpere moves as well
 				destPoint = (scn->MakeTrans() * scn->data().MakeTrans() * Vector4f(0, 0, 0, 1)).block<3, 1>(0, 0);
 				bottom = first->getBottomInWorld(scn->MakeTrans());
@@ -292,7 +292,7 @@ bool Display::launch_rendering(bool loop)
 					scn->data_list[i].ResetMovable();
 
 					if (!strcmp(&scn->data_list[i].model[0], "sphere")) {
-						// Letting the balls move again
+						// Letting the balls move again & increasing the speed
 						scn->randomizeSphereLocation(&scn->data_list[i]);
 						scn->data_list[i].move_model = true;
 						scn->data_list[i].velocityX =
