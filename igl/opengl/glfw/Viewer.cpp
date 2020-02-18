@@ -124,6 +124,8 @@ namespace glfw
   Y,y             Answer Yes
   N,n             Answer No
   Space           Toggle IK
+  K,k             Draw boxes of model
+  T,t             Toggle mouse option to rotate world
   H,h             Reprint this menu for help)"
       )
   {

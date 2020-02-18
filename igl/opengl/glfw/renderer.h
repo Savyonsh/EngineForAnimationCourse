@@ -108,7 +108,7 @@ public:
 	#define NO_NEXT_ROUND			0
 	const long long round_length; // seconds
 	std::chrono::system_clock::time_point round_start_time;
-	bool isGamePaused;
+	bool isGamePaused, flag_mouse_world_rotate;
 	const float score_multi = 0.5;
 
 private:

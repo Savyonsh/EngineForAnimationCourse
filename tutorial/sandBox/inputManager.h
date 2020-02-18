@@ -298,10 +298,7 @@ static void glfw_key_callback(GLFWwindow* window, int key, int scancode, int act
 		case 'T':
 		case 't':
 		{
-			for (int i = 0; i < scn->data_list.size(); i++) {
-				if (strcmp(&(scn->data_list[i].model[0]), "sphere"))
-					std::cout << i << std::endl << scn->data_list[i].MakeTrans() << std::endl << std::endl;
-			}
+			rndr->flag_mouse_world_rotate = !rndr->flag_mouse_world_rotate;
 			break;
 		}
 		case 'R':
@@ -467,7 +464,6 @@ static void glfw_key_callback(GLFWwindow* window, int key, int scancode, int act
 		default: break;//do nothing
 		}
 }
-
 
 void Init(Display& display)
 {

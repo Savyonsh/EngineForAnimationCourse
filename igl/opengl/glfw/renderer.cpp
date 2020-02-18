@@ -8,7 +8,7 @@
 using namespace Eigen; 
 
 Renderer::Renderer() : selected_core_index(0),
-next_core_id(2), score(0), round(0), round_length(15), flag_next_round(UNANSWERED_NEXT_ROUND), isGamePaused(false)
+next_core_id(2), score(0), round(0), round_length(15), flag_next_round(UNANSWERED_NEXT_ROUND), isGamePaused(false), flag_mouse_world_rotate(false)
 {
 	core_list.emplace_back(igl::opengl::ViewerCore());
 	core_list.front().id = 1;
@@ -170,6 +170,8 @@ void Renderer::MouseProcessing(int button)
 		}
 	}
 	else {
+		if (!flag_mouse_world_rotate)
+			return;
 		// World
 		if (scn->worldSelect) {
 			scn->RotateInSystem(scn->MakeTrans(), Eigen::Vector3f(1, 0, 0), xrel / 380.0f, true);

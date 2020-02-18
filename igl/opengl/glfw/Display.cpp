@@ -151,7 +151,8 @@ bool Display::launch_rendering(bool loop)
 	Eigen::Matrix4d model0, model1;
 	Eigen::Matrix3d Rot0, Rot1;
 	vector<double> secondsPerSphere;
-	Vector3f destPoint;
+	Eigen::Vector3f destPoint, bottom;
+	float distance;
 	int index_top = 0;
 	int i = 0;
 	bool didIPrintAlready = false;
@@ -239,8 +240,8 @@ bool Display::launch_rendering(bool loop)
 			if (scn->isIk) {
 				// calculate the destenation point every loop as the selected shpere moves as well
 				destPoint = (scn->MakeTrans() * scn->data().MakeTrans() * Vector4f(0, 0, 0, 1)).block<3, 1>(0, 0);
-				Eigen::Vector3f bottom = first->getBottomInWorld(scn->MakeTrans());
-				float distance = sqrt(pow(destPoint(0) - bottom(0), 2) +
+				bottom = first->getBottomInWorld(scn->MakeTrans());
+				distance = sqrt(pow(destPoint(0) - bottom(0), 2) +
 					pow(destPoint(1) - bottom(1), 2) +
 					pow(destPoint(2) - bottom(2), 2));
 				if (distance <= scn->lengthOfArm)
@@ -262,6 +263,8 @@ bool Display::launch_rendering(bool loop)
 						scn->isIk = false;
 						scn->data().should_appear = false;
 						scn->data().move_model = false;
+						renderer->score += renderer->round * renderer->score_multi * 10;
+						std::cout << "Your current score: " << renderer->score << std::endl;
 					}
 				}
 				else {
@@ -273,6 +276,7 @@ bool Display::launch_rendering(bool loop)
 			if (!didIPrintAlready) {
 				std::cout << "Would you like to go another round? (Press Y/N)" << std::endl;
 				didIPrintAlready = true;
+				renderer->isGamePaused = true;
 				scn->isIk = false;
 				for (igl::opengl::ViewerData* sphere : scn->spheres) {
 					sphere->move_model = false;
@@ -302,6 +306,7 @@ bool Display::launch_rendering(bool loop)
 				// Setting up varibles for next round
 				didIPrintAlready = false;
 				renderer->flag_next_round = UNANSWERED_NEXT_ROUND;
+				renderer->isGamePaused = false;
 				renderer->round_start_time = std::chrono::system_clock::now();
 
 			} else if (renderer->flag_next_round == NO_NEXT_ROUND) {
