@@ -155,6 +155,7 @@ bool Display::launch_rendering(bool loop)
 	float distance;
 	int index_top = 0;
 	int i = 0;
+	int sign = 1;
 	bool didIPrintAlready = false;
 
 	// Finding the first and last cylinder
@@ -209,10 +210,13 @@ bool Display::launch_rendering(bool loop)
 						sphere->should_appear = false;
 						continue;
 					}
-					// Add falling effect if sphere moves in y direction
+					// Add falling effect if sphere moves in y direction	
+
+					(sphere->direction(1) < 0) ? sign = 1 : sign = -1;
+
 					if (sphere->direction(1) * sphere->velocityY > 0)
-						sphere->velocityY += 0.1;
-					else sphere->velocityY += 0.06;
+						sphere->velocityY += 0.1 * sign;
+					else sphere->velocityY += 0.06 * sign;
 
 					// Change direction of sphere if sphere isn't "zero" and touches the ground
 					if (abs((scn->MakeTrans() * sphere->MakeTrans() * sphere->bottomF)(1)
@@ -289,22 +293,21 @@ bool Display::launch_rendering(bool loop)
 				for (auto i = 0; i < scn->data_list.size(); i++) {
 					// Reset the Position of all the objects
 					scn->data_list[i].ResetMovable();
-
-					if (!strcmp(&scn->data_list[i].model[0], "sphere")) {
-						// Letting the balls move again & increasing the speed
-						scn->randomizeSphereLocation(&scn->data_list[i]);
-						scn->data_list[i].move_model = true;
-						scn->data_list[i].velocityX =
-							scn->data_list[i].velocityY =
-							scn->data_list[i].velocityZ =
-							0.4 * renderer->round;
-					}
 				}
 				// set the snake & balls locations at the starting position
 				scn->ResetMovable();
 				adjustModels(scn);
 				first->UpdateCamera(core->camera_eye, core->camera_up, core->camera_translation, scn->MakeTrans());
 
+				for (auto sphere : scn->spheres) {
+					// Letting the balls move again & increasing the speed
+					scn->randomizeSphereLocation(sphere);
+					sphere->move_model = true;
+					sphere->velocityX =
+						sphere->velocityY =
+						sphere->velocityZ =
+						0.4 * renderer->round;
+				}
 				std::cout << "Round " << ++(renderer->round) << " is starting now!" << std::endl;
 
 				// Setting up varibles for next round

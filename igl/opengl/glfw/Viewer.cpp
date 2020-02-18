@@ -597,18 +597,17 @@ namespace glfw
 	  // Center of last cylinder
 	  location = product * Vector4f(0, 0, 0, 1);
 
-	  maxX = location(0) + 10;
+	  maxX = location(0) + 5;
 	  minX = location(0) - 5;
-	  maxY = location(1) + 10;
+	  maxY = location(1) + 5;
 	  minY = location(1) - 5;
 	  maxZ = location(2) + 5;
 	  minZ = location(2) - 5;
-	  if (maxX > 0 && maxY > 0 && maxZ > 0) {
 
 		  // Randomize X Y and Z points around lastCy
-		  newX = rand() % maxX + minX;
-		  newY = rand() % maxY + minY;
-		  newZ = rand() % maxZ + minZ;
+		  newX = minX + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (maxX - minX)));
+		  newY = minY + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (maxY - minY)));
+		  newZ = minZ + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (maxZ - minZ)));
 
 		  // Reset translation and move it to it's new place
 		  sphere->Translate(-sphere->getTranslation());
@@ -629,9 +628,7 @@ namespace glfw
 			  Eigen::Vector3d(newX - 0.1, newY - 0.1, newZ - 0.1),
 			  Eigen::Vector3d(0.5, 0.5, 0.5));
 
-		  sphere->should_appear = true;
-
-	  }
+		  sphere->should_appear = true;	  
   }
 } // end namespace
 } // end namespace
