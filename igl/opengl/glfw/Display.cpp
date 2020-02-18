@@ -285,10 +285,8 @@ bool Display::launch_rendering(bool loop)
 			
 			if (renderer->flag_next_round == YES_NEXT_ROUND) {
 				for (auto i = 0; i < scn->data_list.size(); i++) {
-					// TODO: Reset the Position of all the objects
-					// scn->data_list[i].ResetMovable(); // Need to use adjustModels()
-
-					// TODO: set the snake & balls locations
+					// Reset the Position of all the objects
+					scn->data_list[i].ResetMovable();
 
 					if (!strcmp(&scn->data_list[i].model[0], "sphere")) {
 						// Letting the balls move again
@@ -296,10 +294,12 @@ bool Display::launch_rendering(bool loop)
 
 						// TODO: Speed up the ball's velocity
 
-					} else {
-						// TODO
 					}
 				}
+				// set the snake & balls locations at the starting position
+				scn->ResetMovable();
+				adjustModels(scn, renderer->cyNum, false);
+				first->UpdateCamera(core->camera_eye, core->camera_up, core->camera_translation, scn->MakeTrans());
 
 				std::cout << "Round " << ++(renderer->round) << " is starting now!" << std::endl;
 

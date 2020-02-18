@@ -6,6 +6,7 @@
 #include <fstream>
 #include <string.h>
 #include <vector>
+#include "tutorial/sandBox/common_functions.h"
 
 using namespace std;
 
@@ -116,7 +117,7 @@ bool read_Meshes(igl::opengl::glfw::Viewer* viewer, string file, int amountOfCy,
 	}
 }
 
-void adjustModels(igl::opengl::glfw::Viewer* viewer, int times) {
+/*void adjustModels(igl::opengl::glfw::Viewer* viewer, int times) {
 	bool first = true;
 	bool firstSphere = true;
 	int i;
@@ -225,7 +226,7 @@ void adjustModels(igl::opengl::glfw::Viewer* viewer, int times) {
 	// Adjusting the "camera"
 	viewer->MyTranslate(Eigen::Vector3f(-5, -10, -30));
 	//viewer->MyTranslate(Eigen::Vector3f(-1, -2, -7));
-}
+}*/
 
 /*
 * Explaing the function:
@@ -296,9 +297,10 @@ int main(int argc, char* argv[])
 
 	// Assignment 3 //
 	srand(time(0));
-	int cyNum = 10, shNum = 5;
-	if (!(read_Meshes(&viewer, "configuration.txt", cyNum, shNum))) return 1;	
-	adjustModels(&viewer, cyNum);
+	renderer.cyNum = 10;
+	int shNum = 5;
+	if (!(read_Meshes(&viewer, "configuration.txt", renderer.cyNum, shNum))) return 1;
+	adjustModels(&viewer, renderer.cyNum, true);
 	//add_texture_to_list_of_datas(viewer, "SnakeSkin.png", std::vector<int>
 		//{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}, true, 5);	
 	Init(*disp);

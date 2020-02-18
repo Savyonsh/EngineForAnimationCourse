@@ -1,5 +1,5 @@
 get_filename_component(PROJECT_NAME ${CMAKE_CURRENT_SOURCE_DIR} NAME)
 project(${PROJECT_NAME})
 
-add_executable(${PROJECT_NAME}_bin main.cpp inputManager.h stb_image.h stb_image.c)
+add_executable(${PROJECT_NAME}_bin main.cpp inputManager.h stb_image.h stb_image.c common_functions.h)
 target_link_libraries(${PROJECT_NAME}_bin igl::core igl::opengl igl::opengl_glfw)
