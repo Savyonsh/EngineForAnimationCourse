@@ -597,12 +597,12 @@ namespace glfw
 	  // Center of last cylinder
 	  location = product * Vector4f(0, 0, 0, 1);
 
-	  maxX = location(0) + 5;
-	  minX = location(0) - 5;
-	  maxY = location(1) + 5;
-	  minY = location(1) - 5;
-	  maxZ = location(2) + 5;
-	  minZ = location(2) - 5;
+	  maxX = location(0) + 10;
+	  minX = location(0) - 10;
+	  maxY = location(1) + 10;
+	  minY = location(1) - 10;
+	  maxZ = location(2) + 10;
+	  minZ = location(2) - 10;
 
 		  // Randomize X Y and Z points around lastCy
 		  newX = minX + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (maxX - minX)));

@@ -299,6 +299,8 @@ bool Display::launch_rendering(bool loop)
 				adjustModels(scn);
 				first->UpdateCamera(core->camera_eye, core->camera_up, core->camera_translation, scn->MakeTrans());
 
+				renderer->round++;
+
 				for (auto sphere : scn->spheres) {
 					// Letting the balls move again & increasing the speed
 					scn->randomizeSphereLocation(sphere);
@@ -308,7 +310,7 @@ bool Display::launch_rendering(bool loop)
 						sphere->velocityZ =
 						0.4 * renderer->round;
 				}
-				std::cout << "Round " << ++(renderer->round) << " is starting now!" << std::endl;
+				std::cout << "Round " <<(renderer->round) << " is starting now!" << std::endl;
 
 				// Setting up varibles for next round
 				didIPrintAlready = false;
