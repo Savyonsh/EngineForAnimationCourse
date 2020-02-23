@@ -252,7 +252,7 @@ int main(int argc, char* argv[])
 	// Initializng seed for randomizing moving balls
 	srand(time(0));
 	int cyNum = 10;
-	int shNum = 5;
+	int shNum = 10;
 	if (!(read_Meshes(&viewer, "configuration.txt", cyNum, shNum))) return 1;
 	adjustModels(&viewer, cyNum);
 
