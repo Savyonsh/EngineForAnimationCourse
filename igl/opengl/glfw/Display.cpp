@@ -198,40 +198,55 @@ bool Display::launch_rendering(bool loop)
 				if (sphere->move_model) {
 					// Move sphere
 					sphere->Translate(Vector3f(sphere->direction(0) * sphere->velocityX,
-						sphere->direction(1) * sphere->velocityY,
-						sphere->direction(2) * sphere->velocityZ));
+											   sphere->direction(1) * sphere->velocityY,
+											   sphere->direction(2) * sphere->velocityZ));
 
 					// Check if sphere is in range (on screen) 
 					Vector4f centerS = scn->MakeTrans() * sphere->MakeTrans() * Vector4f(0, 0, 0, 1);
 					Vector3f centerF = first->getBottomInWorld(scn->MakeTrans());
 					if (sqrt(pow(centerS(0) - centerF(0), 2) +
-						pow(centerS(1) - centerF(1), 2) +
-						pow(centerS(2) - centerF(2), 2)) >= 30) {
+							 pow(centerS(1) - centerF(1), 2) +
+							 pow(centerS(2) - centerF(2), 2)) >= 30) {
 						sphere->should_appear = false;
 						continue;
-					}
+						}
 					// Add falling effect if sphere moves in y direction	
 
 					(sphere->direction(1) < 0) ? sign = 1 : sign = -1;
 
+					/* If sphere is directed down and velocityY has a negative sign
+					 Sphere is actually moving up, due to the multiplication of
+					 direction(1) * velocityY
+					 In that case, sign variable changes the addition to
+					 subtraction, decreasing the velocity.
+					 If sphere is directed up and velocityY has a positive sign
+					 Sphere also moves up, and velocityY increases by 0.1,
+					 and becuase it's negative, its actually decreasing in
+					 absulote value.
+
+					 If direction and velocity going in different directions,
+					 The movement will be determind by velocityY, which will
+					 change according to the sign variable */
+
 					if (sphere->direction(1) * sphere->velocityY > 0)
 						sphere->velocityY += 0.1 * sign;
-					else sphere->velocityY += 0.06 * sign;
+					else sphere->velocityY += 0.05 * sign;
 
-					// Change direction of sphere if sphere isn't "zero" and touches the ground
-					if (abs((scn->MakeTrans() * sphere->MakeTrans() * sphere->bottomF)(1)
-						- first->getBottomInWorld(scn->MakeTrans())(1)) <= pow(1.0, -16)
-						&& abs(sphere->velocityY) >= 0.3) {
-						sphere->velocityY = -sphere->velocityY;
-					}
-
+					/* Change direction of sphere if sphere velocity is "decent" enough
+					to bounce back up.
+					*/
 					if ((scn->MakeTrans() * sphere->MakeTrans() * sphere->bottomF)(1)
-						- first->getBottomInWorld(scn->MakeTrans())(1) <= pow(1.0, -16)
-						&& abs(sphere->velocityY) < pow(1.0, -3)) {
-						sphere->move_model = false;
-						secondsPerSphere.at(i) = igl::get_seconds();
+						- first->getBottomInWorld(scn->MakeTrans())(1)
+						<= (float)(pow(0.1, 16))) {
+						if (abs(sphere->velocityY) < (float)pow(0.1, 6)) {
+							sphere->move_model = false;
+							secondsPerSphere.at(i) = igl::get_seconds();
+							}
+						else {
+							sphere->velocityY = -sphere->velocityY;
+							}
+						}
 					}
-				}
 
 				// Checking how long sphere stayed on the ground
 				else {

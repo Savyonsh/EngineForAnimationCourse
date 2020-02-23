@@ -600,9 +600,9 @@ namespace glfw
 	  maxX = location(0) + 10;
 	  minX = location(0) - 10;
 	  maxY = location(1) + 10;
-	  minY = location(1) - 10;
-	  maxZ = location(2) + 10;
-	  minZ = location(2) - 10;
+	  minY = location(1) - 5;
+	  maxZ = location(2) + 5;
+	  minZ = location(2) - 5;
 
 		  // Randomize X Y and Z points around lastCy
 		  newX = minX + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX / (maxX - minX)));
